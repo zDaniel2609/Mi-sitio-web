@@ -1,23 +1,481 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Primera Página Web</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-            background-color: #f4f4f9;
-        }
-        h1 {
-            color: #333;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo de Perfumes</title>
+  <style>
+    :root {
+      --primary: #1a1a1a;
+      --accent: #d4af37; /* Tono dorado elegante */
+      --bg: #f9f9f9;
+      --card-bg: #ffffff;
+      --text: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding-bottom: 80px;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: white;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    .cart-btn {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2rem;
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .product-img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      background-color: #eee;
+      cursor: pointer;
+    }
+
+    .product-info {
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .product-title {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .product-price {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .card-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      flex: 1;
+      transition: background 0.2s;
+    }
+
+    .btn-secondary {
+      background: #eee;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #333;
+    }
+
+    /* Modal / Ventana Flotante */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+      padding: 2rem;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #888;
+    }
+
+    .modal-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    /* Carrito Lateral (Drawer) */
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 100%;
+      max-width: 380px;
+      height: 100%;
+      background: white;
+      box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+      z-index: 300;
+      transition: right 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+    }
+
+    .cart-drawer.open {
+      right: 0;
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .cart-items {
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #f4f4f4;
+    }
+
+    .cart-item-info h4 {
+      font-size: 0.95rem;
+    }
+
+    .cart-item-info p {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #ff4d4d;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .cart-footer {
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+      margin-top: 1rem;
+    }
+
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      padding: 12px;
+      background: #25d366; /* Verde WhatsApp */
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
 </head>
 <body>
-    <h1>¡Hola, mundo!</h1>
-    <p>Esta es mi primera página web publicada en GitHub Pages.</p>
+
+  <header>
+    <h1>PARFUM GALLERY</h1>
+    <button class="cart-btn" onclick="toggleCart()">
+      🛒 Carrito (<span id="cart-count">0</span>)
+    </button>
+  </header>
+
+  <main class="container">
+    <div class="products-grid" id="products-grid">
+      <!-- Los productos se cargan dinámicamente desde JavaScript -->
+    </div>
+  </main>
+
+  <!-- Modal Detalle del Producto -->
+  <div class="modal" id="product-modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal()">&times;</span>
+      <img id="modal-img" class="modal-img" src="" alt="" />
+      <h2 id="modal-title" style="margin-bottom: 0.5rem;"></h2>
+      <p id="modal-price" style="font-weight: bold; color: var(--accent); margin-bottom: 1rem;"></p>
+      <p id="modal-desc" style="color: #666; line-height: 1.5; margin-bottom: 1.5rem;"></p>
+      <button class="btn btn-primary" id="modal-add-btn" style="width: 100%; padding: 10px;">Agregar al Carrito</button>
+    </div>
+  </div>
+
+  <!-- Carrito Lateral -->
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+      <h2>Tu Carrito</h2>
+      <span class="close-modal" onclick="toggleCart()">&times;</span>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <!-- Items agregados aparecerán aquí -->
+    </div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total:</span>
+        <span id="cart-total">$0</span>
+      </div>
+      <button class="checkout-btn" onclick="checkoutWhatsApp()">
+        Pedir por WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // 1. Datos de los perfumes
+    const products = [
+      {
+        id: 1,
+        name: "Noir Élégance 100ml",
+        price: 180000,
+        image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop",
+        description: "Una fragancia amaderada con notas intensas de ámbar, pimienta negra y un toque refinado de vainilla nocturna."
+      },
+      {
+        id: 2,
+        name: "Citrus Breeze 50ml",
+        price: 130000,
+        image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=500&auto=format&fit=crop",
+        description: "Perfume fresco y vibrante con extractos de bergamota, limón italiano y suaves acordes florales de azahar."
+      },
+      {
+        id: 3,
+        name: "Velvet Rose & Oud",
+        price: 210000,
+        image: "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=500&auto=format&fit=crop",
+        description: "Combinación de rosas damascenas envueltas en madera de oud ahumada y praliné dulce. Ideal para la noche."
+      },
+      {
+        id: 4,
+        name: "Ocean Mist Cologne",
+        price: 145000,
+        image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&auto=format&fit=crop",
+        description: "Fragancia acuática y refrescante con notas salinas, salvia y una base limpia de almizcle blanco."
+      }
+    ];
+
+    let cart = [];
+    const whatsappPhone = "573001234567"; // Reemplaza con tu número (incluye código de país)
+
+    // Formatear precios a moneda (COP / Local)
+    function formatMoney(amount) {
+      return '$' + amount.toLocaleString('es-CO');
+    }
+
+    // 2. Renderizar productos en pantalla
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = products.map(p => `
+        <div class="product-card">
+          <img src="${p.image}" alt="${p.name}" class="product-img" onclick="openModal(${p.id})">
+          <div class="product-info">
+            <h3 class="product-title">${p.name}</h3>
+            <div class="product-price">${formatMoney(p.price)}</div>
+            <div class="card-buttons">
+              <button class="btn btn-secondary" onclick="openModal(${p.id})">Ver detalles</button>
+              <button class="btn btn-primary" onclick="addToCart(${p.id})">Agregar</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 3. Control de la Ventana Flotante (Modal)
+    function openModal(id) {
+      const product = products.find(p => p.id === id);
+      document.getElementById('modal-img').src = product.image;
+      document.getElementById('modal-title').innerText = product.name;
+      document.getElementById('modal-price').innerText = formatMoney(product.price);
+      document.getElementById('modal-desc').innerText = product.description;
+      
+      const addBtn = document.getElementById('modal-add-btn');
+      addBtn.onclick = () => {
+        addToCart(product.id);
+        closeModal();
+      };
+
+      document.getElementById('product-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('product-modal').style.display = 'none';
+    }
+
+    // 4. Lógica del Carrito
+    function addToCart(id) {
+      const item = cart.find(i => i.id === id);
+      if (item) {
+        item.quantity++;
+      } else {
+        const product = products.find(p => p.id === id);
+        cart.push({ ...product, quantity: 1 });
+      }
+      updateCart();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.id !== id);
+      updateCart();
+    }
+
+    function updateCart() {
+      // Actualizar contador
+      const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+      document.getElementById('cart-count').innerText = totalCount;
+
+      // Actualizar elementos
+      const cartItemsContainer = document.getElementById('cart-items');
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = '<p style="text-align: center; color: #888; margin-top: 2rem;">El carrito está vacío</p>';
+      } else {
+        cartItemsContainer.innerHTML = cart.map(item => `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <h4>${item.name}</h4>
+              <p>${item.quantity} x ${formatMoney(item.price)}</p>
+            </div>
+            <button class="remove-btn" onclick="removeFromCart(${item.id})">&times;</button>
+          </div>
+        `).join('');
+      }
+
+      // Actualizar total
+      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      document.getElementById('cart-total').innerText = formatMoney(totalAmount);
+    }
+
+    function toggleCart() {
+      document.getElementById('cart-drawer').classList.toggle('open');
+    }
+
+    // 5. Finalizar pedido por WhatsApp
+    function checkoutWhatsApp() {
+      if (cart.length === 0) {
+        alert("Agrega al menos un perfume al carrito para continuar.");
+        return;
+      }
+
+      let message = "¡Hola! Quisiera realizar el siguiente pedido de perfumes:\n\n";
+      cart.forEach(item => {
+        message += `• ${item.name} (x${item.quantity}) - ${formatMoney(item.price * item.quantity)}\n`;
+      });
+
+      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      message += `\n*Total a pagar:* ${formatMoney(total)}`;
+
+      const encodedMessage = encodeURIComponent(message);
+      window.open(`https://wa.me/${whatsappPhone}?text=${encodedMessage}`, '_blank');
+    }
+
+    // Inicializar la página
+    renderProducts();
+  </script>
 </body>
 </html>
