@@ -1,481 +1,1776 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Catálogo de Perfumes</title>
-  <style>
-    :root {
-      --primary: #1a1a1a;
-      --accent: #d4af37; /* Tono dorado elegante */
-      --bg: #f9f9f9;
-      --card-bg: #ffffff;
-      --text: #333333;
-    }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      padding-bottom: 80px;
-    }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    header {
-      background-color: var(--primary);
-      color: white;
-      padding: 1.5rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
+    <title>Catálogo de Perfumes</title>
 
-    header h1 {
-      font-size: 1.5rem;
-      letter-spacing: 1px;
-    }
+    <style>
+      :root {
+        --bg-color: #f9f9f9;
 
-    .cart-btn {
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 10px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.95rem;
-    }
+        --text-color: #333333;
 
-    .container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
+        --card-bg: #ffffff;
 
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 2rem;
-    }
+        --border-color: #e0e0e0;
 
-    .product-card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      flex-direction: column;
-    }
+        --primary: #1a1a1a;
 
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
+        --accent: #d4af37; /* Tono dorado elegante */
 
-    .product-img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-      background-color: #eee;
-      cursor: pointer;
-    }
-
-    .product-info {
-      padding: 1.2rem;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-    }
-
-    .product-title {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-      color: var(--primary);
-    }
-
-    .product-price {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: var(--accent);
-      margin-bottom: 1rem;
-    }
-
-    .card-buttons {
-      display: flex;
-      gap: 8px;
-      margin-top: auto;
-    }
-
-    .btn {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      flex: 1;
-      transition: background 0.2s;
-    }
-
-    .btn-secondary {
-      background: #eee;
-      color: #333;
-    }
-
-    .btn-secondary:hover {
-      background: #e0e0e0;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: #333;
-    }
-
-    /* Modal / Ventana Flotante */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 200;
-      justify-content: center;
-      align-items: center;
-      padding: 1rem;
-    }
-
-    .modal-content {
-      background: white;
-      border-radius: 12px;
-      max-width: 500px;
-      width: 100%;
-      padding: 2rem;
-      position: relative;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #888;
-    }
-
-    .modal-img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-    }
-
-    /* Carrito Lateral (Drawer) */
-    .cart-drawer {
-      position: fixed;
-      top: 0;
-      right: -400px;
-      width: 100%;
-      max-width: 380px;
-      height: 100%;
-      background: white;
-      box-shadow: -5px 0 25px rgba(0,0,0,0.15);
-      z-index: 300;
-      transition: right 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem;
-    }
-
-    .cart-drawer.open {
-      right: 0;
-    }
-
-    .cart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .cart-items {
-      flex-grow: 1;
-      overflow-y: auto;
-    }
-
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #f4f4f4;
-    }
-
-    .cart-item-info h4 {
-      font-size: 0.95rem;
-    }
-
-    .cart-item-info p {
-      font-size: 0.85rem;
-      color: #666;
-    }
-
-    .remove-btn {
-      background: none;
-      border: none;
-      color: #ff4d4d;
-      cursor: pointer;
-      font-size: 1.1rem;
-    }
-
-    .cart-footer {
-      border-top: 1px solid #eee;
-      padding-top: 1rem;
-      margin-top: 1rem;
-    }
-
-    .cart-total {
-      display: flex;
-      justify-content: space-between;
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-    }
-
-    .checkout-btn {
-      width: 100%;
-      padding: 12px;
-      background: #25d366; /* Verde WhatsApp */
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <h1>PARFUM GALLERY</h1>
-    <button class="cart-btn" onclick="toggleCart()">
-      🛒 Carrito (<span id="cart-count">0</span>)
-    </button>
-  </header>
-
-  <main class="container">
-    <div class="products-grid" id="products-grid">
-      <!-- Los productos se cargan dinámicamente desde JavaScript -->
-    </div>
-  </main>
-
-  <!-- Modal Detalle del Producto -->
-  <div class="modal" id="product-modal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeModal()">&times;</span>
-      <img id="modal-img" class="modal-img" src="" alt="" />
-      <h2 id="modal-title" style="margin-bottom: 0.5rem;"></h2>
-      <p id="modal-price" style="font-weight: bold; color: var(--accent); margin-bottom: 1rem;"></p>
-      <p id="modal-desc" style="color: #666; line-height: 1.5; margin-bottom: 1.5rem;"></p>
-      <button class="btn btn-primary" id="modal-add-btn" style="width: 100%; padding: 10px;">Agregar al Carrito</button>
-    </div>
-  </div>
-
-  <!-- Carrito Lateral -->
-  <div class="cart-drawer" id="cart-drawer">
-    <div class="cart-header">
-      <h2>Tu Carrito</h2>
-      <span class="close-modal" onclick="toggleCart()">&times;</span>
-    </div>
-    <div class="cart-items" id="cart-items">
-      <!-- Items agregados aparecerán aquí -->
-    </div>
-    <div class="cart-footer">
-      <div class="cart-total">
-        <span>Total:</span>
-        <span id="cart-total">$0</span>
-      </div>
-      <button class="checkout-btn" onclick="checkoutWhatsApp()">
-        Pedir por WhatsApp
-      </button>
-    </div>
-  </div>
-
-  <script>
-    // 1. Datos de los perfumes
-    const products = [
-      {
-        id: 1,
-        name: "Noir Élégance 100ml",
-        price: 180000,
-        image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop",
-        description: "Una fragancia amaderada con notas intensas de ámbar, pimienta negra y un toque refinado de vainilla nocturna."
-      },
-      {
-        id: 2,
-        name: "Citrus Breeze 50ml",
-        price: 130000,
-        image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=500&auto=format&fit=crop",
-        description: "Perfume fresco y vibrante con extractos de bergamota, limón italiano y suaves acordes florales de azahar."
-      },
-      {
-        id: 3,
-        name: "Velvet Rose & Oud",
-        price: 210000,
-        image: "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=500&auto=format&fit=crop",
-        description: "Combinación de rosas damascenas envueltas en madera de oud ahumada y praliné dulce. Ideal para la noche."
-      },
-      {
-        id: 4,
-        name: "Ocean Mist Cologne",
-        price: 145000,
-        image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&auto=format&fit=crop",
-        description: "Fragancia acuática y refrescante con notas salinas, salvia y una base limpia de almizcle blanco."
+        --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
       }
-    ];
 
-    let cart = [];
-    const whatsappPhone = "573001234567"; // Reemplaza con tu número (incluye código de país)
+      [data-theme="dark"] {
+        --bg-color: #121212;
 
-    // Formatear precios a moneda (COP / Local)
-    function formatMoney(amount) {
-      return '$' + amount.toLocaleString('es-CO');
-    }
+        --text-color: #f0f0f0;
 
-    // 2. Renderizar productos en pantalla
-    function renderProducts() {
-      const grid = document.getElementById('products-grid');
-      grid.innerHTML = products.map(p => `
-        <div class="product-card">
-          <img src="${p.image}" alt="${p.name}" class="product-img" onclick="openModal(${p.id})">
-          <div class="product-info">
-            <h3 class="product-title">${p.name}</h3>
-            <div class="product-price">${formatMoney(p.price)}</div>
-            <div class="card-buttons">
-              <button class="btn btn-secondary" onclick="openModal(${p.id})">Ver detalles</button>
-              <button class="btn btn-primary" onclick="addToCart(${p.id})">Agregar</button>
-            </div>
+        --card-bg: #1e1e1e;
+
+        --border-color: #333333;
+
+        --primary: #ffffff;
+
+        --accent: #f1c40f;
+
+        --shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      }
+
+      * {
+        box-sizing: border-box;
+
+        margin: 0;
+
+        padding: 0;
+
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+
+        color: var(--text-color);
+
+        padding-bottom: 80px;
+
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      header {
+        background-color: #1a1a1a;
+
+        color: white;
+
+        padding: 1.2rem 2rem;
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        position: sticky;
+
+        top: 0;
+
+        z-index: 100;
+
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      header h1 {
+        font-size: 1.4rem;
+
+        letter-spacing: 1px;
+      }
+
+      .header-actions {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+      }
+
+      .theme-toggle-btn {
+        background: transparent;
+
+        border: 1px solid rgba(255, 255, 255, 0.3);
+
+        color: white;
+
+        padding: 8px 14px;
+
+        border-radius: 20px;
+
+        cursor: pointer;
+
+        font-size: 0.85rem;
+
+        transition: all 0.2s;
+      }
+
+      .theme-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .cart-btn {
+        background: var(--accent);
+
+        border: none;
+
+        color: #1a1a1a;
+
+        padding: 9px 16px;
+
+        border-radius: 20px;
+
+        cursor: pointer;
+
+        font-weight: bold;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 8px;
+
+        font-size: 0.9rem;
+      }
+
+      .container {
+        max-width: 1200px;
+
+        margin: 2rem auto;
+
+        padding: 0 1rem;
+      }
+
+      /* Barra y Filtros */
+
+      .controls-section {
+        background: var(--card-bg);
+
+        border: 1px solid var(--border-color);
+
+        padding: 1.2rem;
+
+        border-radius: 12px;
+
+        margin-bottom: 2rem;
+
+        box-shadow: var(--shadow);
+
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 1rem;
+      }
+
+      .search-bar {
+        width: 100%;
+
+        padding: 12px 16px;
+
+        border: 1px solid var(--border-color);
+
+        border-radius: 8px;
+
+        font-size: 1rem;
+
+        background: var(--card-bg);
+
+        color: var(--text-color);
+
+        outline: none;
+
+        transition: border-color 0.2s;
+      }
+
+      .search-bar:focus {
+        border-color: var(--accent);
+      }
+
+      .filters-grid {
+        display: grid;
+
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+        gap: 1rem;
+      }
+
+      .filter-group {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 5px;
+      }
+
+      .filter-group label {
+        font-size: 0.85rem;
+
+        font-weight: 600;
+
+        opacity: 0.8;
+      }
+
+      .filter-select {
+        padding: 10px;
+
+        border: 1px solid var(--border-color);
+
+        border-radius: 8px;
+
+        background: var(--card-bg);
+
+        color: var(--text-color);
+
+        font-size: 0.95rem;
+
+        outline: none;
+
+        cursor: pointer;
+      }
+
+      .filter-select:focus {
+        border-color: var(--accent);
+      }
+
+      .products-grid {
+        display: grid;
+
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+
+        gap: 2rem;
+      }
+
+      .product-card {
+        background: var(--card-bg);
+
+        border: 1px solid var(--border-color);
+
+        border-radius: 12px;
+
+        overflow: hidden;
+
+        box-shadow: var(--shadow);
+
+        transition: transform 0.2s, box-shadow 0.2s;
+
+        display: flex;
+
+        flex-direction: column;
+      }
+
+      .product-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .product-img {
+        width: 100%;
+
+        height: 220px;
+
+        object-fit: cover;
+
+        background-color: #eee;
+
+        cursor: pointer;
+      }
+
+      .product-info {
+        padding: 1.2rem;
+
+        display: flex;
+
+        flex-direction: column;
+
+        flex-grow: 1;
+      }
+
+      .product-tags {
+        display: flex;
+
+        gap: 6px;
+
+        margin-bottom: 8px;
+
+        flex-wrap: wrap;
+      }
+
+      .tag {
+        font-size: 0.72rem;
+
+        padding: 3px 8px;
+
+        border-radius: 12px;
+
+        background: var(--border-color);
+
+        color: var(--text-color);
+
+        font-weight: 600;
+
+        text-transform: uppercase;
+      }
+
+      .product-title {
+        font-size: 1.05rem;
+
+        margin-bottom: 0.5rem;
+
+        color: var(--primary);
+      }
+
+      .product-price {
+        font-size: 1.2rem;
+
+        font-weight: bold;
+
+        color: var(--accent);
+
+        margin-bottom: 1rem;
+      }
+
+      .card-buttons {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 8px;
+
+        margin-top: auto;
+      }
+
+      .btn {
+        padding: 8px 12px;
+
+        border: none;
+
+        border-radius: 6px;
+
+        cursor: pointer;
+
+        font-weight: 500;
+
+        transition: background 0.2s;
+      }
+
+      .btn-secondary {
+        background: var(--border-color);
+
+        color: var(--text-color);
+      }
+
+      /* Botón con (-) a la izquierda y (+) a la derecha */
+
+      .btn-add-stepper {
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        width: 100%;
+
+        padding: 10px 14px;
+
+        background-color: #1a1a1a;
+
+        color: #ffffff;
+
+        border: none;
+
+        border-radius: 6px;
+
+        font-size: 0.95rem;
+
+        font-weight: 600;
+
+        cursor: pointer;
+
+        transition: opacity 0.2s;
+      }
+
+      [data-theme="dark"] .btn-add-stepper {
+        background-color: #333333;
+      }
+
+      .btn-add-stepper:hover {
+        opacity: 0.9;
+      }
+
+      .btn-add-stepper .symbol {
+        font-size: 1.2rem;
+
+        font-weight: bold;
+
+        line-height: 1;
+      }
+
+      .btn-add-stepper .btn-text {
+        flex: 1;
+
+        text-align: center;
+      }
+
+      /* Modal / Ventana Flotante */
+
+      .modal {
+        display: none;
+
+        position: fixed;
+
+        top: 0;
+
+        left: 0;
+
+        width: 100%;
+
+        height: 100%;
+
+        background: rgba(0, 0, 0, 0.6);
+
+        z-index: 200;
+
+        justify-content: center;
+
+        align-items: center;
+
+        padding: 1rem;
+      }
+
+      .modal-content {
+        background: var(--card-bg);
+
+        color: var(--text-color);
+
+        border-radius: 12px;
+
+        max-width: 500px;
+
+        width: 100%;
+
+        padding: 2rem;
+
+        position: relative;
+
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .close-modal {
+        position: absolute;
+
+        top: 15px;
+
+        right: 20px;
+
+        font-size: 1.5rem;
+
+        cursor: pointer;
+
+        opacity: 0.7;
+      }
+
+      .modal-img {
+        width: 100%;
+
+        height: 200px;
+
+        object-fit: cover;
+
+        border-radius: 8px;
+
+        margin-bottom: 1rem;
+      }
+
+      /* Carrito Lateral */
+
+      .cart-drawer {
+        position: fixed;
+
+        top: 0;
+
+        right: -400px;
+
+        width: 100%;
+
+        max-width: 380px;
+
+        height: 100%;
+
+        background: var(--card-bg);
+
+        color: var(--text-color);
+
+        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+
+        z-index: 300;
+
+        transition: right 0.3s ease;
+
+        display: flex;
+
+        flex-direction: column;
+
+        padding: 1.5rem;
+      }
+
+      .cart-drawer.open {
+        right: 0;
+      }
+
+      .cart-header {
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        border-bottom: 1px solid var(--border-color);
+
+        padding-bottom: 1rem;
+
+        margin-bottom: 1rem;
+      }
+
+      .cart-items {
+        flex-grow: 1;
+
+        overflow-y: auto;
+      }
+
+      .cart-item {
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        margin-bottom: 1rem;
+
+        padding-bottom: 0.5rem;
+
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .cart-item-info h4 {
+        font-size: 0.95rem;
+      }
+
+      .cart-item-info p {
+        font-size: 0.85rem;
+
+        opacity: 0.7;
+      }
+
+      .remove-btn {
+        background: none;
+
+        border: none;
+
+        color: #ff4d4d;
+
+        cursor: pointer;
+
+        font-size: 1.1rem;
+      }
+
+      .cart-footer {
+        border-top: 1px solid var(--border-color);
+
+        padding-top: 1rem;
+
+        margin-top: 1rem;
+      }
+
+      .cart-total {
+        display: flex;
+
+        justify-content: space-between;
+
+        font-size: 1.2rem;
+
+        font-weight: bold;
+
+        margin-bottom: 1rem;
+      }
+
+      .checkout-btn {
+        width: 100%;
+
+        padding: 12px;
+
+        background: #25d366; /* Verde WhatsApp */
+
+        color: white;
+
+        border: none;
+
+        border-radius: 8px;
+
+        font-weight: bold;
+
+        font-size: 1rem;
+
+        cursor: pointer;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        gap: 8px;
+      }
+
+      .no-results {
+        text-align: center;
+
+        grid-column: 1 / -1;
+
+        padding: 3rem;
+
+        opacity: 0.7;
+
+        font-size: 1.1rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>CATÁLOGO DE PERFUMES</h1>
+
+      <div class="header-actions">
+        <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()">
+          🌙 Modo Oscuro
+        </button>
+
+        <button class="cart-btn" onclick="toggleCart()">
+          🛒 Carrito (<span id="cart-count">0</span>)
+        </button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Filtros y Búsqueda -->
+
+      <section class="controls-section">
+        <input
+          type="text"
+          id="search-input"
+          class="search-bar"
+          placeholder="Buscar por nombre, nota u olor (ej. calvin klein, valentino, tom ford, dulce)..."
+          oninput="applyFilters()"
+        />
+
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label for="sort-price">Ordenar por Precio</label>
+
+            <select
+              id="sort-price"
+              class="filter-select"
+              onchange="applyFilters()"
+            >
+              <option value="default">Sin ordenar</option>
+
+              <option value="low-to-high">Menos a más costoso</option>
+
+              <option value="high-to-low">Más a menos costoso</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-gender">Género</label>
+
+            <select
+              id="filter-gender"
+              class="filter-select"
+              onchange="applyFilters()"
+            >
+              <option value="all">Todos los géneros</option>
+
+              <option value="hombre">Para Hombre</option>
+
+              <option value="mujer">Para Mujer</option>
+
+              <option value="unisex">Unisex</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-tone">Familia Olfativa / Tono</label>
+
+            <select
+              id="filter-tone"
+              class="filter-select"
+              onchange="applyFilters()"
+            >
+              <option value="all">Todos los tonos</option>
+
+              <option value="amaderado">Amaderado</option>
+
+              <option value="frutal">Frutal</option>
+
+              <option value="citrico">Cítrico</option>
+
+              <option value="floral">Floral</option>
+
+              <option value="dulce">Dulce</option>
+
+              <option value="acuatico">Acuático</option>
+
+              <option value="especiado">Especiado</option>
+
+              <option value="cuero">Cuero</option>
+            </select>
           </div>
         </div>
-      `).join('');
-    }
+      </section>
 
-    // 3. Control de la Ventana Flotante (Modal)
-    function openModal(id) {
-      const product = products.find(p => p.id === id);
-      document.getElementById('modal-img').src = product.image;
-      document.getElementById('modal-title').innerText = product.name;
-      document.getElementById('modal-price').innerText = formatMoney(product.price);
-      document.getElementById('modal-desc').innerText = product.description;
-      
-      const addBtn = document.getElementById('modal-add-btn');
-      addBtn.onclick = () => {
-        addToCart(product.id);
-        closeModal();
-      };
+      <!-- Productos -->
 
-      document.getElementById('product-modal').style.display = 'flex';
-    }
+      <div class="products-grid" id="products-grid"></div>
+    </main>
 
-    function closeModal() {
-      document.getElementById('product-modal').style.display = 'none';
-    }
+    <!-- Modal Detalle del Producto -->
 
-    // 4. Lógica del Carrito
-    function addToCart(id) {
-      const item = cart.find(i => i.id === id);
-      if (item) {
-        item.quantity++;
-      } else {
-        const product = products.find(p => p.id === id);
-        cart.push({ ...product, quantity: 1 });
-      }
-      updateCart();
-    }
+    <div class="modal" id="product-modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
 
-    function removeFromCart(id) {
-      cart = cart.filter(i => i.id !== id);
-      updateCart();
-    }
+        <img id="modal-img" class="modal-img" src="" alt="" />
 
-    function updateCart() {
-      // Actualizar contador
-      const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-      document.getElementById('cart-count').innerText = totalCount;
+        <h2 id="modal-title" style="margin-bottom: 0.5rem"></h2>
 
-      // Actualizar elementos
-      const cartItemsContainer = document.getElementById('cart-items');
-      if (cart.length === 0) {
-        cartItemsContainer.innerHTML = '<p style="text-align: center; color: #888; margin-top: 2rem;">El carrito está vacío</p>';
-      } else {
-        cartItemsContainer.innerHTML = cart.map(item => `
-          <div class="cart-item">
-            <div class="cart-item-info">
-              <h4>${item.name}</h4>
-              <p>${item.quantity} x ${formatMoney(item.price)}</p>
-            </div>
-            <button class="remove-btn" onclick="removeFromCart(${item.id})">&times;</button>
-          </div>
-        `).join('');
-      }
+        <p
+          id="modal-price"
+          style="font-weight: bold; color: var(--accent); margin-bottom: 0.5rem"
+        ></p>
 
-      // Actualizar total
-      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      document.getElementById('cart-total').innerText = formatMoney(totalAmount);
-    }
+        <p
+          id="modal-desc"
+          style="line-height: 1.5; margin-bottom: 1.5rem; opacity: 0.8"
+        ></p>
 
-    function toggleCart() {
-      document.getElementById('cart-drawer').classList.toggle('open');
-    }
+        <!-- CAMBIO AQUÍ: Se cambió de <button> a <div> y se agregaron IDs a los span -->
 
-    // 5. Finalizar pedido por WhatsApp
-    function checkoutWhatsApp() {
-      if (cart.length === 0) {
-        alert("Agrega al menos un perfume al carrito para continuar.");
-        return;
-      }
+        <div class="btn-add-stepper" id="modal-add-btn">
+          <span
+            class="symbol"
+            id="modal-minus-btn"
+            style="cursor: pointer; padding: 0 8px"
+            >-</span
+          >
 
-      let message = "¡Hola! Quisiera realizar el siguiente pedido de perfumes:\n\n";
-      cart.forEach(item => {
-        message += `• ${item.name} (x${item.quantity}) - ${formatMoney(item.price * item.quantity)}\n`;
-      });
+          <span class="btn-text" id="modal-text-btn" style="cursor: pointer"
+            >Agregar al Carrito</span
+          >
 
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      message += `\n*Total a pagar:* ${formatMoney(total)}`;
+          <span
+            class="symbol"
+            id="modal-plus-btn"
+            style="cursor: pointer; padding: 0 8px"
+            >+</span
+          >
+        </div>
+      </div>
+    </div>
 
-      const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/${whatsappPhone}?text=${encodedMessage}`, '_blank');
-    }
+    <!-- Carrito Lateral -->
 
-    // Inicializar la página
-    renderProducts();
-  </script>
-</body>
+    <div class="cart-drawer" id="cart-drawer">
+      <div class="cart-header">
+        <h2>Tu Carrito</h2>
+
+        <span class="close-modal" onclick="toggleCart()">&times;</span>
+      </div>
+
+      <div class="cart-items" id="cart-items"></div>
+
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Total:</span>
+
+          <span id="cart-total">$0</span>
+        </div>
+
+        <button class="checkout-btn" onclick="checkoutWhatsApp()">
+          Pedir por WhatsApp
+        </button>
+      </div>
+    </div>
+
+    <script>
+
+                const defaultImg =
+
+                  "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop";
+
+
+
+                // Catálogo Completo de Perfumes
+
+                const rawProducts =
+
+                [
+
+            ["Asad Lattafa", 180000, "especiado", "hombre", "Aroma cálido, especiado y masculino con notas de pimienta negra, clavo, vainilla y un fondo de ámbar denso.", "https://agaval.vtexassets.com/arquivos/ids/3029151-800-800?v=638969301831330000&width=800&height=800&aspect=true"],
+
+            ["Asad Zanzibar", 180000, "acuatico", "hombre", "Fragancia exótica y moderna que combina la sofisticación del iris con toques salados, especiados y cremosa vainilla.", "https://attoperfumes.com.co/cdn/shop/files/Lattafa-Asad-Zanzibar_grande.jpg?v=1712763603"],
+
+            ["Asad Bourbon", 185000, "dulce", "hombre", "Fusión acogedora de cacao, vainilla y especias aromáticas para una estela seductora y elegante.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwg2VQtFl_71z6APP79uZvvoTKgwxeUVvALIETnPN2jA&s"],
+
+            ["Lattafa Oud For Glory", 210000, "amaderado", "unisex", "Potente e intempestivo acorde de madera de oud, azafrán, lavanda y un distintivo toque de cuero.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaBaytdEz15TvCc6Ub01xAccqBUTGop7GAdf5-GuW2Eg&s"],
+
+            ["Lattafa Amethyst", 190000, "floral", "unisex", "Elegante mezcla de rosas aterciopeladas, pimienta rosa y ambarinos matices de vainilla y madera.", "https://attoperfumes.com.co/cdn/shop/products/LattafaAmethyst.png?v=1652994162&width=1946"],
+
+            ["Lattafa Honor & Glory", 195000, "dulce", "unisex", "Salida gourmand deslumbrante de piña braseada, canela, pimienta negra y una base cremosa de vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOsKxKxw7CZPDSSW3v8iUCRAHTnUxrlbw-RIzSVmQqUA&s=10"],
+
+            ["Khamrah Lattafa", 220000, "dulce", "unisex", "Aroma licoroso y suntuoso cargado de canela, dátiles, haba tonka y una rica capa ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7GRt7OWvm_sxvMTozs7TkeSuQB4G23mgY8MSRyh1JSw&s"],
+
+            ["Khamrah Dukhan", 230000, "especiado", "unisex", "Versión oscura y misteriosa de Khamrah centrada en notas ahumadas, tabaco rico y especias cálidas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTH0CiHoqGSD4gkgx5DoSWKMFtF8BbbCiDFCrSK9aL-oA&s=10"],
+
+            ["Bharara King", 240000, "frutal", "hombre", "Potente explosión de cítricos y frutas maduras que evoluciona hacia una suave base dulce de vainilla y ámbar.", "https://disfragancias.com/cdn/shop/files/Bharara-king_3ffd4fe0-a46e-425d-85ed-ae37d3425895.png?v=1702162864"],
+
+            ["Bharara King Parfum", 260000, "amaderado", "hombre", "Concentración superior con mayor protagonismo de cacao rico, frutas intensas y maderas nobles ambaradas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1fV6LDr9mP8fVRX1w22p7AzaXCqf4vqZoOWt8RHsjYQ&s=10"],
+
+            ["Bharara Bleu", 230000, "citrico", "hombre", "Fragancia dinámica con destellos de bergamota, frutas jugosas, especias e intrigante secado animálico.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZUtkdpNwb-hKeAlXr1nvIr8XlpfCXjMSyGO0JpMOzQ&s=10"],
+
+            ["Bharara Onyx", 235000, "frutal", "hombre", "Aroma vibrante y equilibrado que combina acordes frutales chispeantes con una envolvente calidez de ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTR_JMXIcIHna7VeVjMopmrsNrgvdondcsD_RacnnxfLg&s=10"],
+
+            ["Amber Oud Gold Edition Al Haramain", 250000, "frutal", "unisex", "Bomba de proyección dulce con piña jugosa, melón y una adictiva mezcla de vainilla, ámbar y almizcle.", "https://perfumesbogota.com.co/cdn/shop/products/perfume-al-haramain-amber-oud-gold-edition-eau-de-parfum-120ml-unisex-8399686.webp?v=1785864366"],
+
+            ["Amber Oud Aqua Dubai Al Haramain", 255000, "acuatico", "unisex", "Composición marina y cristalina con notas cítricas enérgicas, especias suaves y toques afrutados.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkNKYeVeyPsgrxPqPhbEvjCJm0qV9Mo-WFfQEr7eKT6w&s=10"],
+
+            ["Oud Saffron Orientica", 240000, "especiado", "unisex", "Lujosa apertura de azafrán exótico, especias cálidas, vainilla y una rica estructura de madera ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIaaAQJnsPnhy0onM06VMsdZ3tJjHvRaN9tUkK5ChVmw&s=10"],
+
+            ["Amber Noir Orientica", 245000, "amaderado", "unisex", "Carácter sofisticado y oscuro marcado por resinas balsámicas, frutas maduras, almizcle y maderas pulidas.", "https://attoperfumes.com.co/cdn/shop/files/OrienticaAmberNoir.webp?v=1698960709"],
+
+            ["Azure Fantasy Orientica", 240000, "frutal", "unisex", "Perfume versátil de frescura refinada con matices frutales, toques balsámicos y suave sándalo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-80kl8h4Ml93_MElnVxVHVFRSmW5sz6pCSU8syJRppQ&s=10"],
+
+            ["Royal Bleu Orientica", 245000, "citrico", "hombre", "Elegancia clásica 'azul' impulsada por manzana, bergamota, lavanda, flores blancas y un fondo de sándalo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgpDQacR5tyFsKZ2rDdTv8Bpm4GVt8puJoOQzhWblcvg&s=10"],
+
+            ["Montale Arabians Tonka", 320000, "dulce", "unisex", "Aroma denso, voluptuoso y de enorme estela cargado de tonka, azúcar moreno, oud suave y almizcle.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvg7U_j4pijFYa-F9Dfs_rdLmPdNCnwsK-N8DdkHJj-g&s=10"],
+
+            ["Montale Intense Café", 310000, "dulce", "unisex", "Deliciosa combinación gourmand de café recién colado, rosas aterciopeladas y una base cremosa de vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbNmxTslYxVNNQl36si8wCoSXwnjPG5yFw5hRt8gWo5g&s=10"],
+
+            ["Montale Starry Nights", 315000, "amaderado", "unisex", "Destellos de limón y bergamota sobre un corazón de rosa, pachulí, ámbar cálido y notas de caramelo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQr1FHjSvp8AKqRGDrfwOov-dhh3U2_BYQhvo0pELBm_g&s=10"],
+
+            ["Il Kakuno Ilmin", 290000, "dulce", "unisex", "Perfume nicho suave y envolvente con acentos ambarados, vainilla atalcada y duradera fijación.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNbUoGVNS2raWCi2zzZAtaX4lzsRYwoNzAcit7vtTlsA&s=10"],
+
+            ["Il Femme Ilmin", 290000, "frutal", "mujer", "Exótica y seductora mezcla de frutas tropicales, toques de tabaco aromático y un manto de vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNtjYT1u8i4zqDrHpd-TOELF4rf18EdAYF6BX4z-Qrdw&s=10"],
+
+            ["Il Pur Ilmin", 290000, "floral", "unisex", "Proyección limpia de flores blancas resplandecientes, destellos cítricos y dulce calidez ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLyLDQjxOJ5NoiER56bHc3BLmSyurC7JDjcs8jIBhVKA&s=10"],
+
+            ["Club de Nuit Intense Man Armaf", 210000, "citrico", "hombre", "La icónica combinación de limón, piña, abedul ahumado y almizcle; una de las fragancias masculinas más elogiadas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQo7YWq6R1xvEkeauYVSazPGCECYbun3Sv6BXzHlepl2w&s=10"],
+
+            ["Club de Nuit Sillage Armaf", 200000, "citrico", "unisex", "Acorde hiperfresco con bergamota, té verde, grosella negra y un fondo ultra limpio de madera y almizcle.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZoDi7_Y2MLmadhXnN1rEMI8ChkLRaa5PFQl3RTzPltQ&s=10"],
+
+            ["Club de Nuit Urban Man Elixir Armaf", 205000, "especiado", "hombre", "Fusión moderna que une la chispa de la pimienta rosada y bergamota con lavanda, ambroxan y pachulí.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0Y3w9uxtSdJOlm69IbzO9zyyxZtley3l6uVbSIVQ8NA&s=10"],
+
+            ["Club de Nuit Lionheart Woman Armaf", 210000, "dulce", "mujer", "Creación opulenta cargada de miel dorada, ámbar cálido, vainilla gourmand y sutiles especias.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3boInoljcoJdfDadvCCPCqunZhXJQkS3R-QW-je5zog&s=10"],
+
+            ["Viking Rio Bharara", 250000, "dulce", "hombre", "Un festín aromático centrado en cacao rico, caramelo crujiente, especias cálidas y maderas dulces.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3eAga6amKS_k9ePxe9j2sISQ6vLO1SS8_tJAL0GIz8w&s"],
+
+            ["Viking Dubai Bharara", 255000, "especiado", "hombre", "Estilo oriental lujoso que entrelaza miel, resinas de ámbar, vainilla cremosa y especias frescas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScLOPoEhcThp1hX9IV-10vdEtkk6dZsT7xcOo8JQ0Eug&s=10"],
+
+            ["Maahir Black Edition Lattafa", 190000, "cuero", "hombre", "Propuesta oscura e imponente con humo de incienso, cuero negro, notas resinosas de pino y pimienta.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_ehNSP-nZGxvTF2eIzVCUS8QHNLgyD7b79Eitx7p6pw&s=10"],
+
+            ["Maahir Legacy Lattafa", 185000, "citrico", "hombre", "Perfil enérgico e hipnotizante tipo 'Mojito' con abundante menta, lima, lavanda y ambroxan amaderado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj4nokFZyuMuiFBCjgXRbVEqg8HBABfCliQ4JbF4qHeA&s=10"],
+
+            ["Shaheen Silver Lattafa", 195000, "frutal", "unisex", "Apertura chispeante de bergamota y cassis que evoluciona hacia notas terrosas de musgo de roble y pachulí.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZUfZeiFAslBL6jUHzNUWnvJGvy4rKGtdQKMs74GNViQ&s=10"],
+
+            ["Shaheen Gold Lattafa", 195000, "frutal", "unisex", "Acorde frutal exótico con piña e higo jugoso entrelazados con especias frescas y madera ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4AWYOPfYkniCwpN8teyqe4MSkjVmcbLva4CKQ6QttwQ&s=10"],
+
+            ["9 PM Afnan", 175000, "dulce", "hombre", "Éxito juvenil de fiesta con manzana verde dulce, canela cálida, azahar y abundante vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQohksyUkfRE4PbOkJwPSjl_JUC8bWPWV9uD5A32abqVg&s=10"],
+
+            ["9 PM Rebel Afnan", 185000, "frutal", "hombre", "Giro atrevido que suma piña caramelizada, toques tropicales, musgo de roble y madera ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZFgG9ABRUTjuhbJX3QvLZGWKBUYMOIShijUQYlIGdjA&s=10"],
+
+            ["9 AM Dive Afnan", 175000, "acuatico", "unisex", "Perfume versátil con menta, limón, manzana verde y una suave brisa marina apoyada en cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPqr83415Y3pKOEdYFI86TzsTYhXe91qEhj74NMMrF9Q&s=10"],
+
+            ["Emeer Lattafa", 200000, "citrico", "unisex", "Apertura intensa de cítricos y té verde con cardamomo, evolucionando hacia un elegante fondo de cuero y cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdWEcX5_Hf_WmjKqi6c8dNBqvWoRoWbIxwVqVkXc_AuA&s"],
+
+            ["Club de Nuit Blue Iconic Armaf", 215000, "citrico", "hombre", "Fragancia 'azul' versátil con toronja, menta fresca, jengibre picante, incienso y sándalo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6xtTMnjC8ETM6wByN7TLyNZ2iPubZpkJWm3YIDfzUxA&s=10"],
+
+            ["Al Qiam Gold Lattafa", 190000, "cuero", "unisex", "Sofisticado acorde de frambuesa madura, cuero fino, azafrán especiado y ámbar envuelto en vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4nN6NudO9UrkjqvHq_0ZtXTd40WVmi5aDmNL-7ZAN3w&s=10"],
+
+            ["Al Qiam Silver Lattafa", 185000, "citrico", "hombre", "Frescura chispeante de pomelo y jengibre seco acompañada de vetiver terroso y suave ambroxan.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJHavSUlR90s3XqgV1toFQUY2MB_n3by5qajG2_9VN9w&s"],
+
+            ["Odyssey Homme White Edition Armaf", 160000, "acuatico", "hombre", "Salida marina y luminosa reforzada con notas cítricas, matices ozónicos y maderas claras.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJI5lQWGgDmikZHI6nScmhscpFkxdZkV6f8Iun3JiRCA&s=10"],
+
+            ["Odyssey Mandarin Sky Armaf", 170000, "citrico", "hombre", "Acorde gourmand sumamente enérgico con mandarina jugosa, haba tonka, caramelo y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNzjuaCsQ6j3bAOpDtS36A-4op_V4RrkPL1SYoZBGlrg&s=10"],
+
+            ["Odyssey Mandarin Sky Elixir Armaf", 180000, "especiado", "hombre", "Interpretación más profunda y resinosa donde los cítricos dulces se funden con especias picantes y vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRejP5Sx1JzpVxG4WBIg1kIkTXSe_XkkGecEdsQxT8jvw&s=10"],
+
+            ["Odyssey Dubai Chocolat Armaf", 185000, "dulce", "unisex", "Una experiencia irresistible cargada de chocolate oscuro, café tostado, caramelo salado y nueces.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3EytxqJdV4FrhBHDpsGkEUVkzxHH-orem3sMuSoQ-JQ&s=10"],
+
+            ["Odyssey Limoni Fresh Edition Armaf", 160000, "citrico", "hombre", "Chispa mediterránea limpia dominada por limón amarillo, hierbas aromáticas y un secado fresco amaderado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSXys-lQVAqCVpvdf5LrJMfUOaHZ_P-HHuWjJUjdURLg&s=10"],
+
+            ["Odyssey Spectra Armaf", 170000, "especiado", "hombre", "Aroma cálido e intrigante con canela dulce, hojas de tabaco rubio, lavanda aromática y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSDQ2TvpeWbI2VTt3NyZbbVvIqaX-qs7gUlpInKVfVng&s=10"],
+
+            ["Odyssey Aqua Edition Armaf", 160000, "acuatico", "hombre", "Perfil limpio y deportivo con notas de brisa marina, lavanda silvestre y cítricos efervescentes.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRaocn30b053nrOnlNvYXtmRqNmxzjzpYhWzveYrVTlzA&s=10"],
+
+            ["Odyssey Artisto Armaf", 165000, "frutal", "hombre", "Tono tropical y desenfadado que une agua de coco, destellos cítricos, haba tonka y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0tw9mX52P8_AOl_8hXjtJHqgs7uzwWgPTnKUO5R-C5w&s=10"],
+
+            ["Odyssey Mega Man Armaf", 165000, "citrico", "hombre", "Apertura enérgica de bergamota y menta verde con un toque dulzón en el secado para uso diario.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRusd02yrsj8hneWUObrkCdc-l5giHQ3dtMWC9Jz7RPfg&s=10"],
+
+            ["Ventana Pour Homme Armaf", 155000, "citrico", "hombre", "Aroma pulcro y masculino compuesto por bergamota, lavanda, pimienta rosa y maderas elegantes.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8ZW5WmZH5wa8kJ0yAnhNQv-sT3wi06uNJESxpUKBzyA&s=10"],
+
+            ["Hawas Black Rasasi", 230000, "frutal", "hombre", "Interpretación madura y distinguida de Hawas con frutas oscuras, matices cítricos y musgo de roble.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdM8GyZ6Not7qDOgswhNGH9531AsFzpt8VjVsCMZ3v8A&s=10"],
+
+            ["Hawas For Him Rasasi", 220000, "acuatico", "hombre", "Éxito mundial que fusiona frescura acuática con ciruela dulce, manzana verde y ámbar gris imponente.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfrOIyo1CObkE-IhPYyCS87za92e-Uun4_z2DhZmd1Qg&s=10"],
+
+            ["Hawas Ice For Him Rasasi", 240000, "citrico", "hombre", "Potenciada ráfaga de menta congelada y cítricos sobre el ADN dulce-acuático característico de Hawas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQav5Q0gFXyxTn_Hz0OCs1n879puvHe4IppLJnRs1omWA&s=10"],
+
+            ["Pax Lorenzo Pazzaglia", 350000, "frutal", "unisex", "Cóctel nicho de frutas exóticas (maracuyá, mango, pera) equilibrado con notas cítricas y fondo terroso.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi9K0HFnMwVQ6FDuc-pqAMYP3qXjfI840rJtBQ2Vx-dw&s=10"],
+
+            ["Summer Hammer Lorenzo Pazzaglia", 360000, "frutal", "unisex", "Verano embotellado con mango jugoso, ron blanco, agua de coco, acorde marino y secado atalcado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTthOY5_dr4ysiBuPfSEYtyol_iMxdgFti4uuO7sYRmrA&s=10"],
+
+            ["Fakhar Black Lattafa", 170000, "frutal", "hombre", "Perfume versátil de manzana crujiente, jengibre picante, salvia y una cálida nota de haba tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGn7a0yALSmjpTOX_cnXDHFXcnB62XiUX2HPUqqd6MQA&s"],
+
+            ["Fakhar Platin Lattafa", 175000, "citrico", "hombre", "Salida limpia de cítricos y especias frescas asentada sobre una base amaderada con matiz ahumado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIBSoC0QH391lvoobNlEFkp5nl7_kbOuFohx1pV_0G7w&s=10"],
+
+            ["Al Noble Ameer Lattafa", 180000, "especiado", "unisex", "Composición rica con manzana verde especiada, clavo de olor, romero y maderas resinosas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQF-SkMLMSzGPvdk1rLv9C118ygY-oxW_Pn_hHECY5Wwg&s=10"],
+
+            ["Al Noble Safeer Lattafa", 180000, "citrico", "unisex", "Perfil verde e intempestivo marcado por hierbas aromáticas, bergamota, salvia y madera seca.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2uzbHiJIKPA_0dE9nxILuR9MGhYFUFzOieRFyHZVX-w&s=10"],
+
+            ["Al Noble Wazeer Lattafa", 185000, "dulce", "unisex", "Delicioso acorde de frutal (maracuyá, pera), caramelo espeso, chocolate blanco y ambarinas maderas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRViodZzOgl0T5KT04ACMi50tjrS-K8bVcI4esniQG3BA&s=10"],
+
+            ["Art Of Universe Lattafa", 190000, "floral", "unisex", "Mezcla armoniosa entre chispeante bergamota, flores blancas refrescantes y suave dulzura ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8KwWlnUokd2E500zBbPxexy9aTAaGkn5lwWbDBcpdBw&s=10"],
+
+            ["His Confession Lattafa", 195000, "especiado", "hombre", "Aroma cálido e íntimo capitaneado por canela madura, iris, resinas balsámicas y reconfortante vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSc4HCGXz_3BlylQnopUgTtMVNXsPWmghCFmO1MlABMQg&s=10"],
+
+            ["Nitro Red Dumont", 210000, "frutal", "hombre", "Enorme proyección juvenil centrada en sandía jugosa, manzana, brisa marina y maderas dulzonas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjWjMNpw3WS6fIqhhcjZxpuFPrMQHbRiFTr0bZYxgE9A&s=10"],
+
+            ["Mayar Cherry Intense Lattafa", 185000, "dulce", "mujer", "Tentador acorde de cerezas negras maduras, cacao en polvo, vainilla densa y cálido ámbar.", defaultImg],
+
+            ["Sakeena Lattafa", 180000, "frutal", "mujer", "Femenina y encantadora creación con maracuyá, frambuesa, agua de coco, rosa y caramelo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuiuhenF2tMyv2yrCF1B13LwISz2SVYOnt23ECTchTqg&s=10"],
+
+      ["Hayaati Lattafa", 150000, "dulce", "hombre", "Fragancia limpia y dulzona versátil con manzana verde, canela suave, tonos marinos y vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkvH1-OaKMA39T-mjLAJRqUZD0xPgYZ-k2OlqKBdH-ig&s=10"],
+
+      ["Hayaati Al Maleky Lattafa", 155000, "amaderado", "hombre", "Versión elegante con resinas balsámicas, notas amaderadas de pino, especias y limpio almizcle.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAw_11B7Y_-ItbeWFSfs3L-1yy8yuzJ7Z1A2lSsa9ceA&s=10"],
+
+      ["Ajwad Lattafa", 175000, "frutal", "unisex", "Proyección potente de frutas liofilizadas, rosa oriental, madera de cedro y dulzura de vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRK5E2OJyY08jV3d5JhPPbXlEIaDluDJFEJKjnfqPvkg&s=10"],
+
+      ["Nebras Lattafa", 210000, "dulce", "unisex", "Abrazadora mezcla gourmand con frutos rojos, cacao cremoso, abundante vainilla y toque atalcado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6zvvfTCStUczWZnOwB3Wr_h81k604TCWbsSp-Ggnc1A&s=10"],
+
+      ["Bleecker Street Bond No 9", 380000, "amaderado", "unisex", "Acorde moderno de hojas de violeta, grosella negra, musgo de roble, tomillo y madera de cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQI9jXHrq_V5-RGitLGf04aKt6MiEwBSYmtmhsJcWqF-w&s=10"],
+
+      ["Tribeca Bond No 9", 390000, "dulce", "unisex", "Aroma urbano y sofisticado con avellanas tostadas, caramelo tibio, cacao, jazmín y musgo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkWlC1hfsitythm4966l3IFbtXiuJS522rEpHn291gPA&s=10"],
+
+      ["Lafayette Street Bond No 9", 385000, "frutal", "unisex", "Elegancia contemporánea con notas florales amieladas, bergamota, manzana, vainilla y ámbar seco.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRD-Sk8EDmZroGvWXb5NMnGgpDv9yUOD6zp9CRV8F1gNQ&s=10"],
+
+      ["The Scent of Peace for Him Bond No 9", 380000, "frutal", "hombre", "Salida chispeante de piña jugosa, bergamota y bayas de enebro respaldada por elegante madera de cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQn8LPuttXYx7FNDJAXf2SMvFGXm2LEanLCxG0G1gpWbQ&s=10"],
+
+      ["Now Rave (Now Black)", 165000, "frutal", "hombre", "Explosión jugosa de piña madura y manzana con un fondo amaderado cremoso de pachulí y musgo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKJhuhQ3qs2-V6z9_SYahsCwyJVbmyMmWAygaIRMhQLw&s=10"],
+
+      ["Now Rouge Rave", 170000, "especiado", "unisex", "Tono cálido con toques de azafrán, jazmín, resinas de abeto y ámbar gris suave.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMpsaxHP7YIVsA9WuTfS39IylZoh4uvUuvw8YMOkxoIQ&s=10"],
+
+      ["Glacier Bold Maison Alhambra", 160000, "frutal", "hombre", "Alternativa seductora protagonizada por agua de coco fresca, bergamota y una adictiva haba tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1a4m81iyCZwddWvxST8XU3USZV7d4ggqClCJqEvt7Ww&s=10"],
+
+      ["Ahli Vega", 210000, "frutal", "unisex", "Equilibrado bouquet de frutas silvestres, flores sofisticadas y suave madera de sándalo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4dZt-9LIMN6ANPbXTRTcrw7DGZEFHIo21zt0j_j3-qQ&s=10"],
+
+      ["Ahli Karpos", 210000, "frutal", "unisex", "Mezcla frutal de cítricos brillantes y jugosas frutas tropicales apoyada en maderas cálidas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjOZZL_XU5C2OOqQkkyC__lBqYAb21aaWtMozvUcOj4A&s=10"],
+
+      ["Le Male Elixir Jean Paul Gaultier", 310000, "dulce", "hombre", "Opulencia ardiente con miel rica, tonka acaramelada, lavanda sensual y suave humo de tabaco.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFapK3i_Ka-OwJ6F04FkYW9Gjtvk_LA46Wi3aCjhtDmA&s=10"],
+
+      ["Le Male Jean Paul Gaultier", 270000, "citrico", "hombre", "Leyenda de la perfumería que equilibra menta fresca, lavanda aromática y suave fondo avainillado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQa4bPuJO8O4aQ-i4S0v8xT06vooI0oal64ywePzlKozw&s=10"],
+
+      ["Le Male Le Parfum Jean Paul Gaultier", 295000, "especiado", "hombre", "Impresionante presencia de cardamomo especiado, lavanda suave, iris y profunda vainilla ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnvvKIBb7o-8D_Kdl0qH5-QeLUpDqSevkk-aRSA0Udsg&s=10"],
+
+      ["Ultra Male Jean Paul Gaultier", 280000, "dulce", "hombre", "Irresistible bomba nocturna que destaca por su jugosa nota de pera, canela cálida, menta y fondo de vainilla negra.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8vM5ehnNoPE9xV5RRBm2j_8mu1U1rm5et6d4cwgsxeA&s=10"],
+
+      ["Le Beau Jean Paul Gaultier", 285000, "citrico", "hombre", "Acorde fresco y veraniego formulado con bergamota chispeante, madera de coco y dulzura de tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjtJMQ1_5dhObH9J4_c0XPQm2LrCNRC62Yvd1txFHZiA&s"],
+
+      ["Le Beau Le Parfum Jean Paul Gaultier", 305000, "amaderado", "hombre", "Extracto concentrado con coco cremoso, sándalo elegante, iris suave y potente haba tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3hE3rkoSRQeGCBPoWEsMheRCSDp95VhzQ7XNjvfxkJQ&s=10"],
+
+      ["Le Beau Paradise Garden Jean Paul Gaultier", 320000, "acuatico", "hombre", "Frescura marina exótica con menta acuática, flor de loto, agua de coco verde y salada vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGRwGFtrl-tovFj6jNtetdX0uup4sGSmzGdlvdZaNiuA&s=10"],
+
+      ["Scandal Pour Homme Absolu JPG", 310000, "dulce", "hombre", "Opulenta combinación de mirabel jugoso, castaña tostada dulzona y madera de sándalo sólida.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEYSQXukKhcjBA7Deemr1CVy11zPHjdold3Wbi3ORCJg&s=10"],
+
+      ["Scandal Pour Homme Jean Paul Gaultier", 290000, "dulce", "hombre", "Golpe gourmand con caramelo salado, haba tonka, salvia aromática y vetiver terroso.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSz3UIHsIYjLmVnBWwUudZMdeWaTtTh1vPPPDodJt3ftQ&s=10"],
+
+      ["Scandal Pour Homme Le Parfum JPG", 300000, "dulce", "hombre", "Versión más audaz e intensa enriquecida con geranio verde, caramelo derretido y sándalo ambarado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTPG0J-2FIP5IBhe3TBXQwdstXF_Y-DhAgzJb_RNumrg&s=10"],
+
+      ["Layton Parfums de Marly", 420000, "especiado", "unisex", "Composición de lujo con manzana verde dulce, lavanda, pimienta rosa, jazmín y rica vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYVyWVIKwrgywoSZym7AsY-VOZvI-TnPDSjaDcv2JcMA&s=10"],
+
+      ["Godolphin Parfums de Marly", 410000, "cuero", "hombre", "Distinguido cuero refinado acentuado por azafrán, tomillo, acordes frutales y maderas resinosas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxVJNuSUEFhYcZ_Mm9W0ihvrBTk2UZXUbLD6IhnSm2_g&s=10"],
+
+      ["Ombre Nomade Louis Vuitton", 550000, "amaderado", "unisex", "Creación majestuosa e intensa dominada por madera de oud natural, incienso, rosa e hilos de cuero.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqkgxxS-Bwdpcn_h5Krr-KazHJSsfxeOQOsqi3PKx3aA&s=10"],
+
+      ["Imagination Louis Vuitton", 520000, "citrico", "hombre", "Frescura de alta costura con cidra, bergamota calabresa, jengibre picante, té negro y ambroxan.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS825yY6pVbbEfZjeX3uPZ7urRTinZzpJvO9yB_hbuu6Q&s=10"],
+
+      ["L'Immensité Louis Vuitton", 520000, "citrico", "hombre", "Ráfaga vibrante de toronja amarga, jengibre fresco, romero y una base cálida de ambroxan y labdanum.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQl31XlJFg313TuwN55OIO-nkmWGnFgfTIVOyGV4nb3Lg&s=10"],
+
+      ["Pacific Chill Louis Vuitton", 530000, "citrico", "unisex", "Inspirado en la costa californiana con grosella negra jugosa, menta, naranja, albahaca y cilantro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfgSinl90IeA0oMYlGlkXZsfgdEww9GjYzf0hX205arQ&s=10"],
+
+      ["212 Heroes Carolina Herrera", 260000, "citrico", "hombre", "Aroma urbano y juvenil que mezcla jengibre fresco, pera jugosa, salvia aromática y un toque de cáñamo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR71lN15WypCcmWeCTHngeHjh3jt2rCUZoL-RLAvEiXpw&s=10"],
+
+      ["212 VIP Men Carolina Herrera", 250000, "frutal", "hombre", "Fragancia fiestera con maracuyá, vodka helado, menta fresca, pimienta y maderas ambaradas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIIosz193vEKFFPfI8G4Pdhx16rXOSSqk6Cmy4TuT27g&s=10"],
+
+      ["212 VIP Black Carolina Herrera", 265000, "dulce", "hombre", "Acorde nocturno de absenta, anís estrellado, lavanda suave y vainilla negra intensa.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9RA_OERE-ScbKk7PpP_xq-iXHXf0e0GyThuKByY0Stg&s=10"],
+
+      ["212 VIP Men Wins Carolina Herrera", 255000, "citrico", "hombre", "Chispeante salida de mandarina y hojas de violeta respaldada por notas florales y vetiver.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9K-fxrRf1jTGM_w-Yrq7kPn9oX36mlr3wVDzKqBPikw&s=10"],
+
+      ["212 Sexy Men Carolina Herrera", 250000, "especiado", "hombre", "Calidez seductora con bergamota, pimienta rosa, cardamomo, madera de sándalo y dulce vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_-LLuFwFlqUVaSG1ImXKiTDRBCz_-EYpL05Ol5O2AVw&s=10"],
+
+      ["212 Men Aqua Carolina Herrera", 245000, "acuatico", "hombre", "Acorde marino helado reforzado con toronja amarga, jengibre, agua de mar y maderas claras.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRosKg6mXV2hSDE_9Ka3jShWuTTGrWx9cOeBIEA0PTig&s=10"],
+
+      ["Bad Boy Carolina Herrera", 270000, "dulce", "hombre", "Contraste de pimienta blanca y negra en la salida con un corazón amaderado y fondo de cacao amargo y tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6LdyUleQW_LmDS2EUlg-ElzniWgma_fh9HIM1H7nf4g&s=10"],
+
+      ["CH Men Carolina Herrera", 260000, "cuero", "hombre", "Clásico sofisticado con notas de hierba fresca, cuero noble, azúcar moreno, violeta y madera.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbPhjIhqjSFTZNq2Js025FaCKiFGxkozX7sHAQeILvNw&s=10"],
+
+      ["CH Men Privé Carolina Herrera", 280000, "cuero", "hombre", "Elegancia nocturna irresistible de acorde de whisky añejo, cuero negro, tonka y benzoíno.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsEjD02bDUxWP0_f5NeN5R_Z6a4z1-V5HBVlEjX_kJOA&s=10"],
+
+      ["CH Birds of Paradise For Him CH", 275000, "amaderado", "hombre", "Edición relajada con notas de brisa de lluvia, manzanilla dulce, madera flotante y abeto verde.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBJxnZMy5SeJAaSf3AuhYpM1tBbZLcaWMDSki18F3LEA&s=10"],
+
+      ["360° For Men Perry Ellis", 140000, "citrico", "hombre", "Clásico noventero muy fresco con bayas de enebro, limón, lavanda, salvia y almizcle limpio.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSN9MOA155GkxsRR8QF8FysVFxQSlG3Vu-mGMxP35P0_A&s=10"],
+
+      ["360° Red For Men Perry Ellis", 145000, "especiado", "hombre", "Chispeante mezcla de lima, bergamota, canela cálida, lavanda y madera de cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEOGEehyoktHt7KTDgb-IjW0lp9J6oNebJqVSNt5EqgA&s=10"],
+
+      ["360° Black For Men Perry Ellis", 145000, "especiado", "hombre", "Acorde nocturno con jengibre, cardamomo, nuez moscada, tabaco y ámbar amaderado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiqKxSkfM8UrLasG2x4iU3qCw6k1VnGTwDWO9dzC2wPA&s=10"],
+
+      ["360° Blue For Men Perry Ellis", 140000, "amaderado", "hombre", "Salida verde y fresca con bergamota, estragón, lavanda, vetiver terroso y cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfUV8sAM8cuQwocSHgq7DVTnQHn4brw0jrK7QdkyXgkw&s=10"],
+
+      ["Acqua Di Giò Giorgio Armani", 280000, "acuatico", "hombre", "La fragancia marina de referencia: brisa salada, bergamota, jazmín y madera de cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0pJPJ40htGTFKQfTnKMoodeAjFt3BCgRSkseG79wuCg&s=10"],
+
+      ["Acqua Di Giò Profumo Giorgio Armani", 310000, "acuatico", "hombre", "Evolución madura con acorde marino, romero fresco, salvia y un toque sofisticado de incienso.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVJ9tvynQYfedmpjyhmK19mNntGsxfjjIEW8_qA47o6g&s=10"],
+
+      ["Acqua Di Giò Profondo Giorgio Armani", 300000, "acuatico", "hombre", "Intensa inmersión oceánica con notas marinas, mandarina verde, romero y un acabado mineral ambarado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROzrfjh-RrwBtraDI6xvuGMkrVN1nHrzD02AACLzZ4nw&s=10"],
+
+      ["Acqua Di Giò Absolu Giorgio Armani", 295000, "amaderado", "hombre", "Fusión cálida entre la frescura marina, notas afrutadas y madera de pachulí tostado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIyNa58suVETIHZkvYf9W99ZUMQe_et8kKODK2tkuy3kvkEmbJQR4FABI&s=10"],
+
+      ["Armani Code Giorgio Armani", 285000, "cuero", "hombre", "Seductor aroma de bergamota, anís estrellado, flor de olivo, cuero fino y tabaco.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAY5CqFZuC7h6Bo3sp_pDjZUNqmyIh1GE_xjZobhaxlg&s"],
+
+      ["Armani Code Profumo Giorgio Armani", 300000, "dulce", "hombre", "Intenso acorde de manzana verde, cardamomo, flor de azahar, haba tonka y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShkF1lnVsAtJfYzVHk5wLQy-YPMGlSyIhuntmxdts77g&s=10"],
+
+      ["Armani Code Absolu Giorgio Armani", 310000, "dulce", "hombre", "Opulento dulzor con mandarina verde, ron, nuez moscada, abundante tonka y vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvyarZBBfWSmKLt8qwwXYrwglcn7Q4TnO42PpxgXnygw&s=10"],
+
+      ["Armani Code Parfum Giorgio Armani", 325000, "amaderado", "hombre", "Sofisticado y moderno con bergamota de Calabria, iris de Toscana, salvia y haba tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUbrCj-TtIjjjjSBW7GQ4dTu_Jpa2zI7Ae9Nh306kFoA&s=10"],
+
+      ["Stronger With You Emporio Armani", 270000, "dulce", "hombre", "Encantadora mezcla de cardamomo, pimienta rosa, menta, castaña glaseada y vainilla.", "https://cdn.valmara.co/57582-large_default/perfume-stronger-with-you-de-giogio-armani-100-ml-edt.webp"],
+
+      ["Stronger With You Intensely Armani", 290000, "dulce", "hombre", "Versión concentrada y muy adictiva con canela, caramelo, toffee, haba tonka y vainilla.", "https://perfumesbogota.com.co/cdn/shop/products/perfume-emporio-armani-stronger-with-you-intensely-eau-de-parfum-100ml-hombre-2777002.webp?v=1785864727"],
+
+      ["Eau de Lacoste L.12.12 Blanc Lacoste", 210000, "floral", "hombre", "Sensación de polo limpio con toronja, romero, nardo fresco, gamuza y cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWKq7-hqhszWQhvgdzpwlUH5DFoss7SSoCBzCTzRSxBA&s=10"],
+
+      ["Eau de Lacoste L.12.12 Noir Lacoste", 210000, "dulce", "hombre", "Acorde veraniego nocturno de sandía jugosa, albahaca fresca, lavanda y chocolate negro amargo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5irXvE55E9C47dlYSfeLtDdjlUDrNxfwZ6ltooY0M1g&s=10"],
+
+      ["Eau de Lacoste L.12.12 Rouge Lacoste", 210000, "especiado", "hombre", "Enérgica combinación de té de rooibos, jengibre picante, cardamomo y pimienta negra.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSv9VVoRXoBiq-T4Bv6gaD_fA8YtzjKm3xWbwK0rLgvtw&s=10"],
+
+      ["Essential Lacoste", 195000, "citrico", "hombre", "Estilo activo y desenfadado con bergamota, hojas de tomatera, pimienta negra y sándalo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiZ37kpPvC3Z70XG9kmSoT2pxulTl18C5xKZZ7YjrWhg&s=10"],
+
+      ["Eau de Lacoste L.12.12 Magnetic", 215000, "floral", "hombre", "Elegancia magnética con notas de bambú, hojas de violeta, té Earl Grey, pachulí y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3oyMh4Yj6mEFag1IzHrjx2iNDQEZa39gkLgoouJ6VGQ&s=10"],
+
+      ["Eau de Lacoste L.12.12 Yellow", 205000, "citrico", "hombre", "Chispeante y enérgica apertura de toronja, manzana Golden Delicious, ciprés y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6_x70M_qbKVUr8DRCJBPgut4JI1K65_C9l2sDwhmZ-Q&s=10"],
+
+      ["Lacoste L.12.12 Vert Men", 200000, "citrico", "hombre", "Aroma natural y relajado de verbena de limón, menta fresca, bergamota y lavanda.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQqepJB6c-bAhFtUgSORknNCnTozQEqGd0BDusn1zc9Q&s=10"],
+
+      ["Boss Bottled Hugo Boss", 240000, "amaderado", "hombre", "Un ícono atemporal de elegancia masculina: manzana crujiente, canela cálida, ciruela y madera de caoba.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTsXMlc1wnNEj5dtzCuW76QIQJAiXO1pb01UMsrfRm8Q&s=10"],
+
+      ["Boss Bottled Night Hugo Boss", 245000, "amaderado", "hombre", "Carácter nocturno e intenso centrado en hojas de violeta, lavanda, jazmín y madera de abedul.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBhF1Rxicb9Ez-7OOnKnzn37AFEVnxd9Au0qjXLtJQEw&s=10"],
+
+      ["Boss The Scent Hugo Boss", 250000, "frutal", "hombre", "Seducción cálida con jengibre picante, la exótica fruta africana Maninka, lavanda y cuero.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjgitJqJjWUwil2rLwfHOiHSshoBIK6ZhnPG6_A8ryDg&s=10"],
+
+      ["Boss Bottled Unlimited Hugo Boss", 235000, "frutal", "hombre", "Golpe de frescura revitalizante de menta congelada, piña madura, las hojas de violeta y sándalo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIUgVDJ3vfM96g5gJm5dBl9WAz3ABsP3NVGthI5bmMdg&s=10"],
+
+      ["Hugo Dark Blue Hugo Boss", 210000, "especiado", "hombre", "Aroma provocador con jengibre, lima, cardamomo, ciprés, tabaco y dulce vainilla.", "https://exitocol.vteximg.com.br/arquivos/ids/23602593/perfume-hugo-boss-dark-blue-75ml-25oz-hombre-original-locion.jpg?v=638563958054700000"],
+
+      ["Hugo Element Hugo Boss", 215000, "acuatico", "hombre", "Diseñado para la ciudad con notas acuáticas ozónicas, jengibre chispeante y madera de cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0C_iMv8HjGKFqSBtlshWfDN2gq5F-dglQaZnEflWzmw&s=10"],
+
+      ["Hugo Just Different Hugo Boss", 210000, "citrico", "hombre", "Vibrante mezcla de menta helada, albahaca, freesia fresca y abeto balsámico.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXuWxoRPV_ntBqHpQFbblrWeveT_5vY7Gs-Q-f_zLBEg&s=10"],
+
+      ["Hugo Man Hugo Boss", 220000, "frutal", "hombre", "El clásico urbano juvenil de manzana verde silvestre, lavanda, menta, pino y salvia.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQw2OEyaAOjdfS4LvRqhHAxdUTN6S_cWBCXgQTrHKMLJQ&s=10"],
+
+      ["Hugo Red Hugo Boss", 210000, "citrico", "hombre", "Dinámica composición basada en acordes fríos y cálidos de pomelo, ruibarbo, piña y ámbar amaderado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHWGzvpLeaQs983AUzNNj6dUc3FhecB6_gd23N0sTX6w&s=10"],
+
+      ["Hugo XY Hugo Boss", 205000, "citrico", "hombre", "Frescura atrevida compuesta por hojas de peral, menta triturada, albahaca y cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2SwMeINwmTRizX_9QwfU6e1OmLihXvOMXtsCrve-pwQ&s=10"],
+
+      ["Boss Bottled Tonic Hugo Boss", 230000, "citrico", "hombre", "Ligera y vigorizante con toronja amarga, naranja amarga, manzana, jengibre y vetiver.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNJq7iyVTwfnKRuGWqxYk4v6bHFmA52RLnmBd9l13Kcg&s=10"],
+
+      ["Boss Orange For Men Hugo Boss", 225000, "dulce", "hombre", "Carácter espontáneo y cálido cargado de manzana crujiente, cilantro, incienso dulce y madera de bubinga.", "https://exitocol.vteximg.com.br/arquivos/ids/23602684/perfume-hugo-boss-orange-hombre-34oz-100ml-locion.jpg?v=638563959118900000"],
+
+      ["Black XS Paco Rabanne", 250000, "dulce", "hombre", "Estilazo rebelde de limón de Calabria, praliné de chocolate, canela, cardamomo y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgQXF8VAF3B051pb7yhz0Sl54wZw9pdlZN_ocyoZPPTA&s=10"],
+
+      ["Black XS L'Exces Paco Rabanne", 260000, "frutal", "hombre", "Salida potente de limón de Amalfi, lavanda, piña madura y notas amaderadas ambaradas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXWFgdrucP7Pzo3S1WX72k8nawbwYrZD2wCTZ0_CVMLA&s=10"],
+
+      ["Invictus Paco Rabanne", 270000, "acuatico", "hombre", "Campeón de la frescura: pomelo efervescente, brisa marina, laurel victorioso y madera de guayaco.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmoTamw6Q6PvNOeIc_Om69z-hAuNWStQT4XtPKIamFyw&s=10"],
+
+      ["Invictus Aqua Paco Rabanne", 280000, "acuatico", "hombre", "Frescura oceánica intensa con pomelo salado, violáceas hojas de violeta y ámbar gris.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6xeiHlsjarYFXCx6JmhWoWBv-mwZR00UEHjmdB1jbTQ&s=10"],
+
+      ["Invictus Legend Paco Rabanne", 285000, "acuatico", "hombre", "Contraste ardiente entre sal marina, toronja jugosa, especias aromáticas y ámbar rojo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpnN4QVcI4nEGMB0UiMokU61Z9w4DQ4_7WLJ0-OeDaBg&s=10"],
+
+      ["Invictus Intense Paco Rabanne", 290000, "amaderado", "hombre", "Versión sensual enriquecida con flor de azahar, pimienta negra, malta de whisky y ámbar salado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCEVOpdoqQ5IxCNp6tk21l-bCUkZQ9qKKHnE3I8ApkYQ&s=10"],
+
+      ["Invictus Onyx Paco Rabanne", 280000, "acuatico", "hombre", "Edición especial amparada en notas marinas, toronja chispeante, laurel y madera ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRM6CtTWgQhpFovx_XxN1D0f572J5EHqnmD_xFirmETrA&s=10"],
+
+      ["Invictus Victory Paco Rabanne", 295000, "dulce", "hombre", "Duelo fresco-dulce entre limón efervescente, incienso ahumado, haba tonka y vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQ5k5zN0SwFko-nZKi5EzcBM36LCfum7VaRYmLnWm1Jw&s=10"],
+
+      ["Invictus Victory Elixir Paco Rabanne", 310000, "dulce", "hombre", "Máxima intensidad gourmand de pimienta negra, lavanda, cardamomo, haba tonka y vainilla negra.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-Cl82iBaw3W9TCVoGrsBokSNGVpqaBnBQMZPsnXKAgA&s=10"],
+
+      ["Invictus Parfum Paco Rabanne", 320000, "acuatico", "hombre", "Frescura azul refinada con lavanda, notas de pimienta rosa, acorde de jabón de lujo y sándalo.", "https://cdn.valmara.co/56536-large_default/invictus-parfum-paco-rabanne-100-ml-hombre.webp"],
+
+      ["One Million Paco Rabanne", 275000, "especiado", "hombre", "El seductor dorado por excelencia: mandarina sangrienta, canela picante, rosas, cuero y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2VkU_FOums6ERoxGaRzRCYnVQ0Adho5H20Dj4INFtBQ&s=10"],
+
+      ["One Million Lucky Paco Rabanne", 285000, "dulce", "hombre", "Aroma vibrante con avellana tostada, ciruela jugosa, pomelo, miel dulce y madera de cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhKl5vmTk2qToZlSIcWM-CllFYCHJNyRpzFmeFJZ1DHw&s=10"],
+
+      ["One Million Privé Paco Rabanne", 295000, "especiado", "hombre", "Orientación íntima cargada de mandarina sangrienta, canela intensa, tabaco de pipa y mirra.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKJk6M46ZMDrcxx9meRjqGvYBiRwhRHwXyREMXmB13Ew&s=10"],
+
+      ["One Million Royal Paco Rabanne", 300000, "amaderado", "hombre", "Elegancia extravagante de cardamomo, lavanda silvestre, salvia y una rica base de benzoíno.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmiaQZ8oC2YqzIKBEhrDf5I60S_gx7m81MGQnlUNumEQ&s=10"],
+
+      ["One Million Parfum Paco Rabanne", 305000, "floral", "hombre", "Innovador acorde de nardos salados, cuero de pino, aceite de monoi (coco) y ámbar solar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDYTT5zGWmDLkwaq6gD36rTzpuLeJZKWX0-2Mq_t1zEQ&s=10"],
+
+      ["One Million Elixir Paco Rabanne", 315000, "dulce", "hombre", "Densidad gourmand de manzana silvestre, licorosa davana, rosa de Damasco, vainilla y tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0i7aiERZRwzLTqLkdLi-ri1eT30Vi1UrTk5Oxuf9F-A&s=10"],
+
+      ["Phantom Paco Rabanne", 270000, "citrico", "hombre", "Fusión tecnológica de limón de Amalfi, lavanda cremosa, humo terroso, vetiver y vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeZIpETaq_LmCz8TdSunUeSdbLAg1kjlkfhBXVmRjR_A&s=10"],
+
+      ["Phantom Parfum Paco Rabanne", 290000, "especiado", "hombre", "Lado oscuro y sensual centrado en lavanda francesa, cardamomo especiado, ruibarbo y vainilla bourbon.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUB8gJdwszuRXEnGAgTY4RFuNDp06ilb7yRC3ggXe0ng&s=10"],
+
+      ["Pure XS Paco Rabanne", 265000, "especiado", "hombre", "Tensión entre calor y frío con jengibre fresco, savia vegetal, vainilla quemada, licor y canela.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQao-3L-4VEeajZuaAoB59r7OXSprhYROhrRpvZoCPggA&s=10"],
+
+      ["Fame Paco Rabanne", 280000, "frutal", "mujer", "Perfume ultra contemporáneo de mango jugoso, jazmín blanco, incienso cremoso y vainilla.", "https://perfumesbogota.com.co/cdn/shop/products/perfume-paco-rabanne-fame-eau-de-parfum-80ml-mujer-2600012.jpg?v=1785864066"],
+
+      ["Herrera For Men Carolina Herrera", 230000, "especiado", "hombre", "Distinción clásica con romero, lavanda, clavo de olor, geranio, madera de sándalo y tabaco.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQARIuao1YrX16QsJiqVupR6jwVuiUSjt1gfxPEoD7D9g&s=10"],
+
+      ["Allure Homme Sport Chanel", 340000, "citrico", "hombre", "Elegancia deportiva sensacional con mandarina, aldehídos limpios, brisa marina, pimienta y tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQecFuDT7AXXrEOqdG7o9GTJ47l3Y2fN6Z1VLGCjGN_Fg&s=10"],
+
+      ["Bleu De Chanel", 360000, "citrico", "hombre", "La sofisticación atemporal definitiva: toronja, menta, jengibre, jazmín, incienso ahumado y cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRXZxrM242H6r0KT8uFijh2IKsX6babA4n5aimdnC8yw&s=10"],
+
+      ["Aqva Pour Homme Bvlgari", 260000, "acuatico", "hombre", "Inmersión marina auténtica con mandarina, algas marinas (posidonia), lavanda y ámbar mineral.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR36GNSH60DOGf6PBrq1j8pR6bHebVRvMLNdK1XqZWGfQ&s=10"],
+
+      ["Bvlgari Man In Black", 290000, "cuero", "hombre", "Opulencia viril de ron especiado, azafrán, iris noble, cuero negro, benzoíno y haba tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRz4SFrTyebJ215FisCnahGYMsZGipDncvvRwu3leby2g&s=10"],
+
+      ["BLV Pour Homme Bvlgari", 240000, "especiado", "hombre", "Limpieza sofisticada caracterizada por jengibre picante, cardamomo, flor de tabaco y sándalo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOW6Azs5iiMpZUEyW_3yB8X5WwdsUZwa-jSr1IY1s-rQ&s=10"],
+
+      ["Bvlgari Man Extreme", 255000, "citrico", "hombre", "Vibrante explosión de pomelo rosado, bergamota, cactus, cardamomo y vetiver de Haití.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2l1ug3UBg_crEfV9uXuTspydGtVRuM6x0uoKZkIfnVA&s=10"],
+
+      ["Aventus Creed", 580000, "frutal", "hombre", "La fragancia de nicho más famosa del mundo: piña crujiente, grosella negra, abedul ahumado y musgo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-6zqLXKfmcgWpEM8jf-7rZZ5C1dKSCxngunQaNpK_lg&s=10"],
+
+      ["Silver Mountain Water Creed", 560000, "citrico", "unisex", "Inspirado en los Alpes suizos: bergamota, mandarina, té verde, grosella negra y sándalo limpio.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsfitV9KLthRoCvn5Dku6ZwhCXcwyn7MWDKcfymNDOaQ&s=10"],
+
+      ["Millésime Impérial Creed", 560000, "citrico", "unisex", "Elegancia aristocrática de frutas saladas de mar, bergamota, iris, mandarina y almizcle solar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqASKyFTd18bQU6rnevzEtNBGiFknjU1xLjMh7-t0TPw&s=10"],
+
+      ["Viking Creed", 570000, "especiado", "hombre", "Carácter indomable de pimienta rosa, menta piperita, bergamota, lavanda, vetiver y sándalo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLJxgNaNlu6Wuvu7nqab5ZGlzFpKUs_-A3ieveuoa8kA&s=10"],
+
+      ["Original Santal Creed", 550000, "amaderado", "unisex", "Opulento aroma de canela especiada, bayas de enebro, sándalo Mysore, lavanda y vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZ7sVLqi8NGsVbGQb-LKwrTxO-h4WWQDvM8XcHApQz1w&s=10"],
+
+      ["Green Irish Tweed Creed", 570000, "amaderado", "hombre", "Un paseo por la campiña irlandesa: verbena de limón, hojas de violeta, iris, menta y ámbar gris.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4Fbn6l4H3dMrESwbG85lfRww1FyWQqlFsR5xG_WW55Q&s=10"],
+
+      ["Versace Pour Homme Dylan Blue", 240000, "citrico", "hombre", "Versatilidad moderna de bergamota de Calabria, notas acuáticas, pimienta negra, ambroxan e incienso.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6aAmIxhSN1KzpEht-TdkeFNNeeTuIeHf13MhAYFf5Vg&s=10"],
+
+      ["Versace Man Eau Fraiche", 220000, "citrico", "hombre", "Ultra refrescante para verano: carambola mediterránea, limón de Amalfi, cedro y estragon.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZktYAJtjAQJIzgMNvEJimSRnfprAZ2o0UorfdkDqcPA&s=10"],
+
+      ["Eros Versace", 250000, "dulce", "hombre", "Sensualidad desbordante con menta verde fresca, manzana verde, haba tonka y abundante vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdYd-0LXbDg7R_DpU85OeE-MwlAK_bVbLgNENxsB6xhQ&s=10"],
+
+      ["Eros Flame Versace", 260000, "citrico", "hombre", "Pasión ardiente de cítricos italianos (chinotto, mandarina), pimienta negra, romero y tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsRtJ91mRK1aP3PFKZQDhT-IYjoEyTPJmGwim2gtnp6Q&s=10"],
+
+      ["Versace Pour Homme", 235000, "citrico", "hombre", "Luminosidad mediterránea de limón de Diamante, neroli, hojas de naranjo amargo y cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYqprFW6qqmTpnhkF1RejFUW25eZtOMP1Cw51-p5BGDg&s=10"],
+
+      ["K By Dolce & Gabbana", 260000, "citrico", "hombre", "Liderazgo moderno con cítricos sanguinos, guindilla pimiento, lavanda, salvia y cedro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTm1RmnEGWT0rLmgxEplZBGKwELU-CNGhzivWmAOn12g&s=10"],
+
+      ["Light Blue Dolce & Gabbana", 230000, "citrico", "hombre", "Icónico aroma estival con toronja fresca, bergamota, enebro, pimienta de Sichuan y musgo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5X7ZiJh_iuLJG_Kq4pf1F_QFMhb-DzH3LPSOMpFCdsg&s=10"],
+
+      ["Light Blue Pour Homme Summer Vibes – Dolce & Gabbana", 245000, "citrico", "hombre", "Una versión veraniega y fresca que combina notas cítricas mediterráneas vibrantes con un toque amaderado y ambarado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOj7QAs4OJENXUfT2aDJEhBCp18x2lx_XKkL10t7dzng&s=10"],
+
+      ["Light Blue Eau Intense – Dolce & Gabbana", 250000, "acuatico", "hombre", "Un aroma fresco, salado y acuático intensificado con fondo amaderado. Perfecto para climas calurosos.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMLTS854zTnVW7AK6XSw0I4xLvMf9eSusu5HDOs6Bg4Q&s=10"],
+
+      ["The One Grey – Dolce & Gabbana", 255000, "citrico", "hombre", "Fragancia sofisticada con notas aromáticas y de especias frescas sobre una base amaderada y de ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbHiV_LzYQFSw1Db0Rz2c3lTtzqIku1ztj-RXPkTQXoQ&s=10"],
+
+      ["Intenso – Dolce & Gabbana", 240000, "acuatico", "hombre", "Un perfume con acordes marinos, aromáticos y matices salados apoyados en maderas cálidas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpHqv19f-yQmebAjJ3GGwcTmzE4Rfb00NVNVlQRlMojg&s=10"],
+
+      ["Game of Spades Full House – Jo Milano", 270000, "citrico", "unisex", "Mezcla fresca de cítricos con matices florales suavemente amaderados y fondo almizclado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCWeDG6lwzOxViBNVx3HH0z8alV534ezoLWWay-Gdwyg&s=10"],
+
+      ["Game of Spades Wildcard – Jo Milano", 275000, "frutal", "unisex", "Fragancia juvenil y vibrante repleta de frutas jugosas con matices frescos y aromáticos.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTR70eFKrkwrmn4t5c-dXoTjJaVaTKsMXsByv2A6nAwVg&s=10"],
+
+            ["Game of Spades Boston – Jo Milano", 285000, "amaderado", "unisex", "Perfume envolvente con acorde metálico, floral blanco, notas amaderadas y toques animálicos.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQr-pcnIE5i1QQKnFHeDmqQCGIeRWFuxXghHK1ALRZynQ&s=10"],
+
+            ["Game of Spades Rouge – Jo Milano", 290000, "especiado", "unisex", "Fragancia intensa y especiada con fondo amaderado y toques balsámicos.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlPTOS5pNPzCOW1_igsViZvtgyB_P3REVdNsVdvtYrsw&s=10"],
+
+            ["Sauvage Elixir – Dior", 390000, "especiado", "hombre", "Una interpretación ultra concentrada con rica lavanda, especias como la canela y un fondo amaderado profundo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR423rSn3nHkPgrs5fGUSRNd7M3ys1BZ1CtM_BfN6dig&s=10"],
+
+            ["Sauvage Parfum – Dior", 360000, "citrico", "hombre", "Mezcla madura de cítricos frescos, madera densa y toques de vainilla suave atalcada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZeOS3KzmVz4Vys89pemSlbl-p0YxSWegbHI9xPE6Qig&s=10"],
+
+            ["Dior Homme Intense – Dior", 350000, "amaderado", "hombre", "Una joya amaderada y elegante con toques florales, notas ambaradas y matices terrosos.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4xpiZWwZrpMFPuVSUX236t2g5-DuHQkIS0eTSwSXxtw&s=10"],
+
+            ["Fahrenheit – Dior", 320000, "cuero", "hombre", "Fragancia clásica e icónica con un perfil marcadamente masculino de cuero, notas aromáticas cítricas y fondo animálico.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-vzylHvzscCO-vlULFrWvBXYB15MInlNKw1O6cT3eCw&s=10"],
+
+            ["Higher – Dior", 300000, "frutal", "hombre", "Perfume fresco y dulce con un toque frutal, matices verdes e hilvanado sobre una base amaderada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHkNYQus8Enl5ULp1XjO-vx2ZQkLuIJR_LiCHswXcV1A&s=10"],
+
+            ["CK One – Calvin Klein", 190000, "citrico", "unisex", "Un clásico limpio, liviano y rejuvenecedor con notas amaderadas y de almizcle.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRX2phtfpTrRkCafQ0ExccN_aaZhhrfb7iNkaxd6CH3Xg&s=10"],
+
+            ["CK Be – Calvin Klein", 190000, "floral", "unisex", "Fragancia intimista con acordes florales suaves, notas cítricas y secado de almizcle amaderado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrvqyOiZicVhdCa5h1zdryRl1mFx0tYTxpLaS06hJYJQ&s=10"],
+
+            ["Eternity For Men – Calvin Klein", 210000, "citrico", "hombre", "Un aroma fougère clásico, limpio y refrescante con toques florales y secado de madera.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe2ryHza8zI5My5Pvg-NK-91CCvbGh4TszKNTmcb0QoA&s=10"],
+
+            ["Escape for Men – Calvin Klein", 205000, "acuatico", "hombre", "Perfume fresco y acuático enriquecido con eucalipto, notas marinas y madera ambiental.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFcDYwAAAIGdWpf1Fhh7055U3ze7dXDVTxC65yNdcD1g&s=10"],
+
+            ["CK Free – Calvin Klein", 195000, "amaderado", "hombre", "Fragancia ligera y fresca con toques de especias como la canela sobre fondo atalcado y amaderado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqvYCDnbrSZxLhKWSK2ZBGsNo2tFEDYZ11C-j_BE9p8Q&s=10"],
+
+            ["Obsession for Men – Calvin Klein", 200000, "especiado", "hombre", "Intenso aroma oriental especiado con toques de cacao, cítricos y maderas dulces.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBO7Vl8-9_7i-MSv9jJ3ZDbETfhbXebZjLqq1EyRXWsA&s=10"],
+
+            ["CK IN2U for Him – Calvin Klein", 185000, "citrico", "hombre", "Fragancia juvenil con limón vibrante, notas marinas y una base cálida amaderada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdgypo6vPuDbm3eabdjKK3-MnwB6xss0ME_hEuOzw5fA&s=10"],
+
+            ["CK Free Sport – Calvin Klein", 195000, "acuatico", "hombre", "Enfoque enérgico y ozónico con fondo de hierbas verdes y maderas frescas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgXMLYvgbayar1oF7Cl0OaRZkncZcuYwPOsPPG7E-mbg&s=10"],
+
+            ["Valentino Uomo Born In Roma – Valentino", 330000, "dulce", "hombre", "Combinación moderna de notas dulces, vainilla atalcada y tonos amaderados con espíritu urbano.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeFVomWbZwQAdH-T8uOPIpH1QimF-3gpojBYqiqcS9VQ&s=10"],
+
+            ["Valentino Uomo Born In Roma Intense – Valentino", 350000, "dulce", "hombre", "Perfume seductor e intenso con acordes de tabaco, notas afrutadas y maderas oscuras.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTopJUUTEJAy0u-YaiAF3UcRne_lWiB6OSVBPoA7Ut8hQ&s=10"],
+
+            ["Valentino Uomo Born In Roma Coral Fantasy – Valentino", 340000, "citrico", "hombre", "Salida cítrica jugosa mezclada con matices de café terroso y fondo amaderado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRS7SXTk79PO6WyUSBGBOd4fnvguWHGMP8K2sUGHJoosg&s=10"],
+
+            ["Valentino Uomo Born in Roma Green Stravaganza – Valentino", 350000, "cuero", "hombre", "Mezcla atrevida de cuero sofisticado, notas terrosas dulces y toque gourmand de vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzQnv2ZUNGmV3hcqysHPmP7XWOAS9U7-eBNzMtOFMmmA&s=10"],
+
+            ["Valentino Uomo Intense – Valentino", 345000, "cuero", "hombre", "Fragancia elegante y densa con notas gourmand de chocolate, café, frutos secos y cuero.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNoRsaJfY7BBBjaCQ9EQBcGmFX15GN9Xf1luNH4ssKjA&s"],
+
+            ["Valentino Yellow Dream – Valentino", 335000, "dulce", "hombre", "Aroma cálido, exótico y exultante con toques tropicales, especiados y fondo de vainilla.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh13jAzCYqC2lt2yhc9UMmTM0RyA-ETYDVNHx8HfRaiA&s=10"],
+
+            ["Lapidus Pour Homme – Ted Lapidus", 150000, "dulce", "hombre", "Un potente clásico ochentero que destaca por sus notas de miel, tabaco, especias y maderas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT--6HvSzoIVwZLH4ZSD35avscPb8fT2PECCJ-tME3k9w&s=10"],
+
+            ["Swiss Army Victorinox – Victorinox", 180000, "citrico", "hombre", "Olor fresco, aventurero y balsámico con un toque limpio de almizcle y maderas alpinas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIL8CBuEP8hA2sbU3N6nqjILTp3iNqFTG9S2YO-BB-HQ&s=10"],
+
+            ["Swiss Army Altitude – Victorinox", 185000, "citrico", "hombre", "Salida fresca de menta, cítricos y lavanda sobre acordes atalcados y frutos del bosque.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPP0OX5Vt_akD1sWKAg_zUFe-rzlRCW8L9BlL4cMt4hQ&s=10"],
+
+            ["Tommy Now – Tommy Hilfiger", 210000, "citrico", "hombre", "Perfume juvenil de estilo urbano con cítricos vibrantes, musgo de roble y madera ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBWr7BWoll0-V3vfu-Ys_Obk-Use31Rozdhx6PYfLRmw&s=10"],
+
+            ["Impact Intense – Tommy Hilfiger", 240000, "especiado", "hombre", "Fragancia especiada y moderna con toques ozónicos, frutos secos y madera resinosa.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDjYXXBxvOAPskNklqs_97as0Hf_KR9mjGgZLPE6tFlw&s=10"],
+
+            ["Emblem – Montblanc", 230000, "frutal", "hombre", "Aroma elegante y sofisticado con secado de nueces, hierbas aromáticas y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgSRrL-grllnAJDQ-XVqIiIlX08z_jJ4qMOpk3gWaSUg&s=10"],
+
+            ["Explorer – Montblanc", 250000, "citrico", "hombre", "Salida brillante de bergamota que se transforma en acordes amaderados, terrosos y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4QVFMZ1rKXoWGCvvtYwgWJ8wzDrJd4WDkXnvB-FDTHw&s"],
+
+            ["Legend – Montblanc", 235000, "floral", "hombre", "Un perfume atemporal estilo fougère con lavanda, musgo de roble y un secado cálido ambarado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJv6_rRYxc8yaYAnxlHgOIX7mfsYJXc-oSFfTTae90bA&s=10"],
+
+            ["Legend Spirit – Montblanc", 240000, "citrico", "hombre", "Versión blanca y luminosa de la saga Legend, con notas acuáticas, cítricos y maderas claras.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZjrwPu8bubmSeF8LIP925x8gyOBrcK4t31ALrEqDlQQ&s=10"],
+
+            ["Legend Blue – Montblanc", 245000, "acuatico", "hombre", "Una interpretación fresca, limpia y azul con matices florales y salpicones acuáticos.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThpUoy-x32Ht9kIwAW3Io70I6Vawmsvjz0crr4hF0tLw&s=10"],
+
+            ["Legend Night – Montblanc", 245000, "frutal", "hombre", "Fragancia nocturna y sensual enriquecida con notas de vainilla, frutas jugosas y matices atalcados.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLmBNikSY11XNbX6scEEGXdmAfUSAaPkkxR2N89IrgDQ&s=10"],
+
+            ["Nautica Voyage – Nautica", 130000, "acuatico", "hombre", "Icónico aroma ultra fresco de manzana verde, notas acuáticas y florales limpias con madera suave.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI2qJVpof-jKifW22JxshKncVFHvh0pS_Qrt_yn8nKdA&s=10"],
+
+            ["Polo Deep Blue Parfum – Ralph Lauren", 310000, "acuatico", "hombre", "Un perfil acuático profundo cargado de cítricos marinos, mango verde tropical y maderas oscuras.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKBrr0h8NIbS3V7YbAMN4eH5RtdKik6_swOos4S_U_zw&s=10"],
+
+            ["Polo Blue – Ralph Lauren", 280000, "acuatico", "hombre", "Frescura clásica inspirada en la brisa del océano, con notas de pepino, melón y gamuza amaderada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSy4l_khLVU4POfnwvnFTNskXRiG8Wug4FST40ODt25dg&s=10"],
+
+            ["Polo Red – Ralph Lauren", 280000, "frutal", "hombre", "Perfume enérgico compuesto por arándano rojo, cítricos, grano de café y maderas cálidas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvo-DnoghS_UzmMWFpiI2fpyLxgYxMCeczt6PkHWforA&s=10"],
+
+            ["Polo Sport – Ralph Lauren", 260000, "acuatico", "hombre", "Clásico deportivo noventero, vigorizante, con hierbas frescas, notas marinas y base de madera.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4S0HDIyZXZNMSsVx9RcY6EV84kbVgVVuCwGanayxlqw&s=10"],
+
+            ["Polo Black – Ralph Lauren", 290000, "dulce", "hombre", "Aroma misterioso y masculino con notas de mango helado, tonka, oud y ámbar especiado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxoLKsAlEU8n_K98BBXXn2dbohDerO8zqb2hTgeTVolw&s=10"],
+
+            ["Ombré Leather – Tom Ford", 480000, "cuero", "unisex", "Una experiencia de cuero negro lujoso, rico y denso con toques terrosos y ámbar sofisticado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc7RWCYAhhjj5EgOCIoZIraXJgmW2MxwTrqSQtZLhj4Q&s=10"],
+
+            ["Oud Wood – Tom Ford", 520000, "amaderado", "unisex", "Elegante composición de madera de agar (oud), palo de rosa, especias cálidas y un secado avainillado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBwPqYGLkGFXloCJ-zN31nJ9lM1jjb91hQvlXDvEpJiw&s=10"],
+
+            ["Noir de Noir – Tom Ford", 510000, "floral", "unisex", "Perfume gótico y oscuro con rosas profundas, pachulí terroso, trufa y toque cálido especiado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_hV4IaCuFW8xiMREdHo-Um1a1wR2I-7laieb-YzBDtw&s=10"],
+
+            ["Tobacco Vanille – Tom Ford", 530000, "especiado", "unisex", "Aroma opulentamente dulce y cálido dominado por hojas de tabaco de pipa, vainilla cremosa y frutos secos.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQI6btLpX3TxXnw9Ka5t8nIBFag8r-pzB9OTtyUvAXOxQ&s=10"],
+
+            ["Black Orchid – Tom Ford", 490000, "dulce", "unisex", "Obra de arte olfativa densa y lujosa con orquídea negra, especias cálidas, chocolate oscuro y pachulí.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZlPrwkMo1S43mPAZfIQOhFj2U4TPBOt_ccM3-yzA3fQ&s=10"],
+
+            ["Pegasus – Parfums de Marly", 430000, "floral", "hombre", "Perfume elegante de almendra amarga, lavanda y bergamota sobre una firme base de vainilla y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlTxY1vO-9jsdxNkm_E3cVHcil6KWT5PoodDkpF3o2mQ&s"],
+
+            ["Toy Boy – Moschino", 260000, "floral", "hombre", "Una propuesta rompedora de rosa especiada con pimienta rosa, pimienta indonesia y secado amaderado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTRIhw2hg7T1OcOyJtME-ksO_jn8k8kROZNMAxnf0-fg&s=10"],
+
+            ["Fresh Couture – Moschino", 230000, "citrico", "hombre", "Divertida y fresca mezcla cítrica de bergamota y ylang-ylang con toques de anís y ámbar.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStN7eOsfkhiZtWLZN8EUJbN_R3QP6HGf-Hgs8iO1-teA&s=10"],
+
+            ["Toy 2 Pearl – Moschino", 270000, "acuatico", "unisex", "Fragancia marina y salina con limón refrescante, acorde de arena y matices dulces amaderados.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRv5ojoDlZu6Imaa2-bqLA68CVxsPA7ws_EDl0EtxGJCg&s=10"],
+
+            ["Arsenal Black – Gilles Cantuel", 135000, "especiado", "hombre", "Perfume especiado y envolvente con toques de pachulí, notas atalcadas y madera oscura.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScDEYPX44dy4Jh6V-9u1AAQU5lOCwytgmk75iqZ3AJZw&s=10"],
+
+            ["Arsenal Gold – Gilles Cantuel", 135000, "especiado", "hombre", "Combinación llamativa de notas cítricas, canela dulce, cuero ambarado y base de madera.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHWXLXW5VmRaYd1NgYWrBg6QEqrFWUYVByI4SExh69AA&s=10"],
+
+            ["Arsenal Red – Gilles Cantuel", 135000, "especiado", "hombre", "Fragancia picante y cálida cargada de especias, acordes florales masculinos y madera de sándalo.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS13UBKBqTv6HzdKWwTVRMjqI5dbdzaFGnKUc_CFRaUxA&s=10"],
+
+            ["Arsenal Platinum – Gilles Cantuel", 135000, "citrico", "hombre", "Aroma vibrante, limpio e higiénico con notas de cítricos, toques verdes y base ambarada.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ76qFDiD6a9N5RMSEICGv2AW-Z_Jk29rwWI9Lbm5MpOg&s=10"],
+
+            ["Cedrat Boise – Mancera", 320000, "citrico", "unisex", "Éxito nicha de limones italianos, grosella negra, frutas jugosas y secado sofisticado de cuero y madera.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStrJ12sLQ0ItxjyE7XSSatybyAOxDqQ29zhmbXOV0REw&s=10"],
+
+            ["Wanted – Azzaro", 260000, "cuero", "hombre", "Fragancia atrevida con limón, jengibre, tonka y acordes amaderados picantes.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSF2B2sCfbBpLXqWot8Cq60Ki5Jgw6TeDYZOAyuXTpCIA&s"],
+
+            ["Baccarat Rouge 540 – Maison Francis Kurkdjian", 620000, "dulce", "unisex", "Icono de la perfumería moderna; dulzura cristalina de azafrán, jazmín, ámbar gris y cedro.", "https://perfumesbogota.com.co/cdn/shop/products/perfume-maison-francis-kurkdjian-baccarat-rouge-540-extrait-de-parfum-70ml-unisex-6308761.jpg?v=1785865446"],
+
+            ["Oud for Greatness – Initio Parfums Privés", 580000, "amaderado", "unisex", "Poderosa combinación de madera de agar (oud), lavanda, nuez moscada y azafrán sobre un fondo amaderado terroso.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD94-vnMoXmh9Lrofnec8afULjWvkryv2XfEo07QSN0A&s=10"],
+
+            ["Paris Hilton for Men – Paris Hilton", 140000, "frutal", "hombre", "Aroma ultra fresco y juvenil con mango, higo, salvia y toques ozónicos amaderados.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3gvro18J4vXVbjaC0cT31DhIUYnDtE64IagVFoRggiw&s=10"],
+
+            ["Terre d'Hermès – Hermès", 340000, "citrico", "hombre", "Estructura magistral de naranja amarga, pomelo, sílice mineral y madera de cedro vetiver.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzUTNi8QXjWxkc6j1htXIM35JDLhTnwMoL0HcF4vqCZQ&s=10"],
+
+            ["MYSLF – Yves Saint Laurent", 360000, "floral", "hombre", "Perfume moderno que une la frescura de la bergamota con flor de azahar del naranjo y pachulí amaderado.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRd1LFNL1Sf9rM8phUmZDIcV-rYOLCLQQjyZsTP1HCmRA&s=10"],
+
+            ["MYSLF L’Absolu – Yves Saint Laurent", 380000, "floral", "hombre", "Intensa unintensa reinterpretación de la flor de azahar con toques especiados y fondo amaderado denso.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEnt3J-uMOqVa1oaRhqCQqAL-hiCnbdSGwu4JIvycLcQ&s=10"],
+
+            ["Y Eau de Parfum – Yves Saint Laurent", 350000, "citrico", "hombre", "Fragancia duradera y versátil que mezcla manzana verde, salvia, jengibre y haba tonka.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtJJwj8nXDa8mGozb881IXQyTf75hYE9g7L0MrTVyDdQ&s=10"],
+
+            ["Y Le Parfum – Yves Saint Laurent", 370000, "floral", "hombre", "Versión oscura y profunda cargada de lavanda de alta calidad, geranio y cedro negro.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfHmIgyU89gvns01ylvifd_AftM4NsiglBcVqLHc4H7w&s=10"],
+
+            ["Y Eau de Toilette – Yves Saint Laurent", 320000, "citrico", "hombre", "Olor ultra limpio y brillante con aldehídos, bergamota, jengibre y maderas blancas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR5DooyvOLfxP2vyjcIWw5aEGgnEp6SvLxyVMTWusjYQ&s=10"],
+
+            ["L'Eau d'Issey Pour Homme – Issey Miyake", 260000, "citrico", "hombre", "Clásico y atemporal yuzu japonés combinado con nuez moscada, canela, notas acuáticas y vetiver.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4aKkv04cBTlNgo-QeVwcGU8XP3L2BFS-UwcBv-gt1IA&s=10"],
+
+            ["London for Men – Burberry", 230000, "especiado", "hombre", "El perfume definitivo para otoño/invierno con notas de hojas de tabaco, canela, vino tinto y cuero.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqgu2Bm8ndI0O_t_UqwMKhTApOqei1Wce1juXrwGds9A&s=10"],
+
+            ["Spicebomb – Viktor&Rolf", 310000, "especiado", "hombre", "Explosión especiada de pimienta rosa, canela, azafrán, cuero y tabaco.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVXsq-E6bOGkFXFn5QY-Uj-4AXjwS7Wud03Pv0BnFy3Q&s=10"],
+
+            ["Spicebomb Extreme – Viktor&Rolf", 340000, "especiado", "hombre", "Bomba seductora de vainilla negra cremosa, pimienta negra, alcaravea y tabaco denso.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWmMDIRUyilUaD07aC1_W7y6XaXmzT22aK6ZRaxk53Ng&s=10"],
+
+            ["Bergamote 22 – Le Labo", 540000, "citrico", "unisex", "Bergamota de máxima calidad combinada con petit grain, pomelo, ámbar y vetiver.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyoSp086tT6wqy8gaqOXF6lu0v2U5Sb9nmAIo_Hrz1wg&s=10"],
+
+            ["Santal 33 – Le Labo", 560000, "amaderado", "unisex", "Legendario perfume de sándalo australiano, violeta, papiro, cuero y tonos ahumados.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIFUaE6cU7nZ8T0gtg7VOBXXQeNos7XRZ95RZwRyXihA&s=10"],
+
+            ["Stallion 53 – Emper", 180000, "amaderado", "unisex", "Alternativa inspirada en fragancias amaderadas de sándalo con cuero sofisticado y toques florales de violeta.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxbf9MUvys_YVP2JUgleo5Ywf-x-4eJaWeevDQivVlpQ&s=10"],
+
+            ["FiDi – Bond No. 9", 390000, "acuatico", "hombre", "Aroma fresco, moderno y vibrante que combina cítricos, pimienta negra, flor de loto y maderas.", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLibM-sLDCic9fC06Hq3P0IFMOocgU1C8KbqPMufmQRg&s=10"]
+
+                ];
+
+                const products = rawProducts.map(
+                  ([name, price, tone, gender, description, image], id) => ({
+                    id,
+                    name,
+                    price,
+                    tone,
+                    gender,
+                    description,
+                    image: image || defaultImg,
+                  })
+                );
+
+
+
+                let cart = [];
+
+                const whatsappPhone = "573152607811"; // Tu número telefónico
+
+
+
+                function formatMoney(amount) {
+
+                  return "$" + amount.toLocaleString("es-CO");
+
+                }
+
+
+
+                function renderProducts(items) {
+
+                  const grid = document.getElementById("products-grid");
+
+
+
+                  if (items.length === 0) {
+
+                    grid.innerHTML =
+
+                      '<div class="no-results">No se encontraron perfumes que coincidan con la búsqueda.</div>';
+
+                    return;
+
+                  }
+
+
+
+                  grid.innerHTML = items
+
+                    .map(
+
+                      (p) => `
+
+                  <div class="product-card">
+
+                    <img src="${p.image}" alt="${
+
+                        p.name
+
+                      }" class="product-img" onclick="openModal(${p.id})">
+
+                    <div class="product-info">
+
+                      <div class="product-tags">
+
+                        <span class="tag">${p.gender}</span>
+
+                        <span class="tag">${p.tone}</span>
+
+                      </div>
+
+                      <h3 class="product-title">${p.name}</h3>
+
+                      <div class="product-price">${formatMoney(p.price)}</div>
+
+                      <div class="card-buttons">
+
+                        <button class="btn btn-secondary" onclick="openModal(${
+
+                          p.id
+
+                        })">Ver detalles</button>
+
+                      <div class="btn-add-stepper">
+
+                        <span class="symbol" onclick="event.stopPropagation(); decreaseCart(${
+
+                          p.id
+
+                        })">-</span>
+
+                        <span class="btn-text" onclick="addToCart(${p.id})">Agregar</span>
+
+                        <span class="symbol" onclick="event.stopPropagation(); addToCart(${
+
+                          p.id
+
+                        })">+</span>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                `
+
+                    )
+
+                    .join("");
+
+                }
+
+
+
+                function applyFilters() {
+
+                  const query = document
+
+                    .getElementById("search-input")
+
+                    .value.toLowerCase()
+
+                    .trim();
+
+                  const sortPrice = document.getElementById("sort-price").value;
+
+                  const gender = document.getElementById("filter-gender").value;
+
+                  const tone = document.getElementById("filter-tone").value;
+
+
+
+                  let filtered = products.filter((product) => {
+
+                    const matchesSearch =
+
+                      product.name.toLowerCase().includes(query) ||
+
+                      product.description.toLowerCase().includes(query) ||
+
+                      product.tone.toLowerCase().includes(query);
+
+
+
+                    const matchesGender = gender === "all" || product.gender === gender;
+
+                    const matchesTone = tone === "all" || product.tone === tone;
+
+
+
+                    return matchesSearch && matchesGender && matchesTone;
+
+                  });
+
+
+
+                  if (sortPrice === "low-to-high") {
+
+                    filtered.sort((a, b) => a.price - b.price);
+
+                  } else if (sortPrice === "high-to-low") {
+
+                    filtered.sort((a, b) => b.price - a.price);
+
+                  }
+
+
+
+                  renderProducts(filtered);
+
+                }
+
+
+
+                /* Modal */
+
+                function openModal(id) {
+
+                  const product = products.find((p) => p.id === id);
+
+                  document.getElementById("modal-img").src = product.image;
+
+                  document.getElementById("modal-title").innerText = product.name;
+
+                  document.getElementById("modal-price").innerText = formatMoney(
+
+                    product.price
+
+                  );
+
+                  document.getElementById("modal-desc").innerText = product.description;
+
+
+
+                  document.getElementById("modal-minus-btn").onclick = () =>
+
+                    decreaseCart(product.id);
+
+                  document.getElementById("modal-text-btn").onclick = () => {
+
+                    addToCart(product.id);
+
+                    closeModal();
+
+                  };
+
+                  document.getElementById("modal-plus-btn").onclick = () =>
+
+                    addToCart(product.id);
+
+                  document.getElementById("product-modal").style.display = "flex";
+
+                }
+
+
+
+                function closeModal() {
+
+                  document.getElementById("product-modal").style.display = "none";
+
+                }
+
+
+
+                /* Carrito */
+
+                function addToCart(id) {
+
+                  const item = cart.find((i) => i.id === id);
+
+                  if (item) {
+
+                    item.quantity++;
+
+                  } else {
+
+                    const product = products.find((p) => p.id === id);
+
+                    cart.push({ ...product, quantity: 1 });
+
+                  }
+
+                  updateCart();
+
+                }
+
+
+
+                function decreaseCart(id) {
+
+                  const item = cart.find((i) => i.id === id);
+
+                  if (item) {
+
+                    if (item.quantity > 1) {
+
+                      item.quantity--;
+
+                    } else {
+
+                      cart = cart.filter((i) => i.id !== id);
+
+                    }
+
+                  }
+
+                  updateCart();
+
+                }
+
+
+
+                function removeFromCart(id) {
+
+                  cart = cart.filter((i) => i.id !== id);
+
+                  updateCart();
+
+                }
+
+
+
+                function updateCart() {
+
+                  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+                  document.getElementById("cart-count").innerText = totalCount;
+
+
+
+                  const cartItemsContainer = document.getElementById("cart-items");
+
+                  if (cart.length === 0) {
+
+                    cartItemsContainer.innerHTML =
+
+                      '<p style="text-align: center; opacity: 0.6; margin-top: 2rem;">El carrito está vacío</p>';
+
+                  } else {
+
+                    cartItemsContainer.innerHTML = cart
+
+                      .map(
+
+                        (item) => `
+
+                    <div class="cart-item">
+
+                      <div class="cart-item-info">
+
+                        <h4>${item.name}</h4>
+
+                        <p>${item.quantity} x ${formatMoney(item.price)}</p>
+
+                      </div>
+
+                      <button class="remove-btn" onclick="removeFromCart(${
+
+                        item.id
+
+                      })">&times;</button>
+
+                    </div>
+
+                  `
+
+                      )
+
+                      .join("");
+
+                  }
+
+
+
+                  const totalAmount = cart.reduce(
+
+                    (sum, item) => sum + item.price * item.quantity,
+
+                    0
+
+                  );
+
+                  document.getElementById("cart-total").innerText =
+
+                    formatMoney(totalAmount);
+
+                }
+
+
+
+                function toggleCart() {
+
+                  document.getElementById("cart-drawer").classList.toggle("open");
+
+                }
+
+
+
+                function checkoutWhatsApp() {
+
+                  if (cart.length === 0) {
+
+                    alert("Agrega al menos un perfume al carrito para continuar.");
+
+                    return;
+
+                  }
+
+
+
+                  let message =
+
+                    "¡Hola! Quisiera realizar el siguiente pedido de perfumes:\n\n";
+
+                  cart.forEach((item) => {
+
+                    message += `• ${item.name} (x${item.quantity}) - ${formatMoney(
+
+                      item.price * item.quantity
+
+                    )}\n`;
+
+                  });
+
+
+
+                  const total = cart.reduce(
+
+                    (sum, item) => sum + item.price * item.quantity,
+
+                    0
+
+                  );
+
+                  message += `\n*Total a pagar:* ${formatMoney(total)}`;
+
+
+
+                  window.open(
+
+                    `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`,
+
+                    "_blank"
+
+                  );
+
+                }
+
+
+
+                /* Modo Oscuro / Claro */
+
+                function toggleTheme() {
+
+                  const html = document.documentElement;
+
+                  const currentTheme = html.getAttribute("data-theme");
+
+                  const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+
+
+                  html.setAttribute("data-theme", newTheme);
+
+                  document.getElementById("theme-btn").innerText =
+
+                    newTheme === "dark" ? "☀️ Modo Claro" : "🌙 Modo Oscuro";
+
+                }
+
+
+
+                // Inicialización
+
+                renderProducts(products);
+    </script>
+  </body>
 </html>
